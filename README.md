@@ -9,9 +9,9 @@ Generate autosized 3D qrcode printable file.
 
 # Dev use
 
-'''
+```
 npm install
 npm run dev
-'''
+```
 
-[Edit on StackBlitz ⚡️](https://stackblitz.com/edit/qrcode-3d-print)
+[Test on StackBlitz ⚡️](https://stackblitz.com/edit/qrcode-3d-print)
