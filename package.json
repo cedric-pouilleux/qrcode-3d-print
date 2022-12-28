@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "file-saver": "^2.0.5",
     "qrcode": "^1.5.1",
     "three": "^0.148.0",
     "threejs-export-stl": "^0.0.4",

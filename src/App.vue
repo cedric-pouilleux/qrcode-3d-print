@@ -16,6 +16,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue';
 import * as exportSTL from 'threejs-export-stl';
 import { use3DQrcode } from './composables/use3DQrcode';
 import { SceneManager } from './classes/SceneManager';
+import { saveAs } from 'file-saver';
 
 const canvas = ref();
 const valueContent = ref('QRCODE#TEXT');
@@ -45,8 +46,13 @@ function handleChange(event: Event) {
 }
 
 async function handleExport() {
-  const buffer = exportSTL.fromMesh(mesh.value);
-  const blob = new Blob([buffer], { type: exportSTL.mimeType });
-  alert(buffer);
+  try {
+    const isFileSaverSupported = !!new Blob();
+    const buffer = exportSTL.fromMesh(mesh.value);
+    const blob = new Blob([buffer], { type: exportSTL.mimeType });
+    saveAs(blob, `3D-print-${valueContent.value.trim()}-qrcode.stl`);
+  } catch (e) {
+    console.error(e);
+  }
 }
 </script>
