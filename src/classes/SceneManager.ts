@@ -9,6 +9,7 @@ interface ISceneManager {
   addLights(): void;
   addQRCode(mesh: THREE.Mesh, size: number): void;
   resize(): void;
+  getScene(): THREE.Scene;
   init(canvas: HTMLCanvasElement): void;
 }
 
@@ -17,6 +18,10 @@ export class SceneManager implements ISceneManager {
   renderer = new THREE.WebGLRenderer();
   controls: OrbitControls;
   camera: THREE.PerspectiveCamera;
+
+  public getScene(): THREE.Scene {
+    return this.scene;
+  }
 
   public addRenderer(): this {
     this.renderer.shadowMap.enabled = true;

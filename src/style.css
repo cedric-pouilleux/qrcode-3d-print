@@ -18,12 +18,18 @@ input {
   width: 100%;
 }
 
-button {
-  cursor: pointer;
+.bottom-actions {
   position: absolute;
+  display: flex;
   bottom: 10px;
+  width: 100%;
+}
+
+.bottom-actions button {
+  display: flex;
   background-color: #000;
+  cursor: pointer;
   color: #ff0000;
-  font-size: 20px;
+  font-size: 16px;
   width: 100%;
 }
