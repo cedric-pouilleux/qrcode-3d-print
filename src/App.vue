@@ -1,10 +1,10 @@
 <template>
   <div class="app">
-    <input
-      type="text"
-      :value="valueContent"
-      @input="handleChange"
-      placeholder="Write your qrcode string content"
+    {{ errorCorrectionLevel }}
+    <v-tweakpane
+      class="tweakpane"
+      :pane="{ title: 'Configurations' }"
+      @on-pane-created="handlePaneCreated"
     />
     <div class="bottom-actions">
       <button @click="handleExportSTL">Export .STL format</button>
@@ -15,19 +15,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, watch, onMounted, onBeforeUnmount, reactive } from 'vue';
 import * as THREE from 'three';
 import * as exportSTL from 'threejs-export-stl';
 import { use3DQrcode } from './composables/use3DQrcode';
 import { SceneManager } from './classes/SceneManager';
 import { saveAs } from 'file-saver';
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter';
+import { VTweakpane } from 'v-tweakpane';
 
 const canvas = ref();
-const valueContent = ref('QRCODE#TEXT');
 
-const { mesh, size, content } = use3DQrcode(valueContent.value);
+const { mesh, size, content, errorCorrectionLevel } = use3DQrcode();
 const scene = new SceneManager();
+
+const params = reactive({
+  content,
+  errorCorrectionLevel,
+});
 
 onMounted(() => {
   scene
@@ -43,12 +48,31 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-  window.removeEventListener('resize', scene.resize);
+  window.removeEventListener('resize', () => scene.resize());
 });
 
-function handleChange(event: Event) {
-  content.value = event.target.value;
-  scene.addQRCode(mesh.value, size.value);
+watch(
+  params,
+  () => {
+    scene.addQRCode(mesh.value, size.value);
+  },
+  { deep: true }
+);
+
+function handlePaneCreated(pane: Pane) {
+  const qrcodePane = pane.addFolder({
+    title: 'QR Code',
+  });
+  qrcodePane.addInput(params, 'content', { label: 'Value' });
+  qrcodePane.addInput(params, 'errorCorrectionLevel', {
+    label: 'Correction',
+    options: {
+      Low: 'L',
+      Medium: 'M',
+      Quartile: 'Q',
+      High: 'H',
+    },
+  });
 }
 
 function handleExportSTL() {
@@ -80,3 +104,12 @@ function handleExportGITF() {
   );
 }
 </script>
+
+<style scoped>
+.tweakpane {
+  width: 300px;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+</style>

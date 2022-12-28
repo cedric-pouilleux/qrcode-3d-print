@@ -1,5 +1,5 @@
 import { computed, ref, Ref, ComputedRef } from 'vue';
-import { create } from 'qrcode';
+import { create, BitMatrix, QRCodeErrorCorrectionLevel } from 'qrcode';
 import * as THREE from 'three';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
@@ -7,19 +7,26 @@ interface IUse3DQrcode {
   mesh: ComputedRef<THREE.Mesh>;
   size: ComputedRef<number>;
   content: Ref<string>;
+  errorCorrectionLevel: Ref<string>;
 }
 
-export function use3DQrcode(text: string): IUse3DQrcode {
-  const content = ref(text);
+export function use3DQrcode(): IUse3DQrcode {
+  const content = ref<string>('Start writing');
+  const errorCorrectionLevel = ref<QRCodeErrorCorrectionLevel>('M');
 
-  const getContent = computed(() => create(content.value).modules);
+  const getContent = computed(
+    (): BitMatrix =>
+      create(content.value, {
+        errorCorrectionLevel: errorCorrectionLevel.value,
+      }).modules
+  );
   const size = computed((): number => getContent.value.size);
 
   const geometryArray = computed((): Array<THREE.BufferGeometry> => {
     const bufferGeometryArray: THREE.BufferGeometry[] = [];
     let row = 0;
     let col = 0;
-    getContent.value.data.forEach((item: boolean, index: number) => {
+    getContent.value.data.forEach((item: number | boolean, index: number) => {
       if (index) {
         if (index % getContent.value.size === 0) {
           col++;
@@ -58,5 +65,6 @@ export function use3DQrcode(text: string): IUse3DQrcode {
     mesh,
     content,
     size,
+    errorCorrectionLevel,
   };
 }
