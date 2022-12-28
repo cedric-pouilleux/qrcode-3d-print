@@ -73,6 +73,13 @@ function handleExport() {
       new Blob([buffer], { type: exportSTL.mimeType }),
       `3D-print-${params.content.trim()}-qrcode.stl`
     );
+    if (!params.mergeGeometry) {
+      const planBuffer = exportSTL.fromMesh(scene.plan);
+      saveAs(
+        new Blob([planBuffer], { type: exportSTL.mimeType }),
+        `3D-print-${params.content.trim()}-qrcode-socle.stl`
+      );
+    }
   } catch (e) {
     console.error(e);
   }

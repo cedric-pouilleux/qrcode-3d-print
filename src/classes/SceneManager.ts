@@ -18,6 +18,7 @@ interface ISceneManager {
   addControls(): void;
   addCamera(): void;
   addLights(): void;
+  addGrid(): void;
   refresh(mesh: Mesh, size: number): void;
   resize(): void;
   getScene(): Scene;
@@ -36,6 +37,7 @@ export class SceneManager implements ISceneManager {
   controls: OrbitControls;
   camera: PerspectiveCamera;
   gridHelper: GridHelper;
+  plan: Mesh;
 
   public getScene(): Scene {
     return this.scene;
@@ -49,13 +51,13 @@ export class SceneManager implements ISceneManager {
   }
 
   public addPlan(size: number): this {
-    const plan = new Mesh(
+    this.plan = new Mesh(
       new BoxGeometry(size + 2, size + 2, 1),
       new MeshStandardMaterial({ color: 0x333333 })
     );
-    plan.position.z = -1;
-    plan.name = 'plan';
-    this.scene.add(plan);
+    this.plan.position.z = -1;
+    this.plan.name = 'plan';
+    this.scene.add(this.plan);
     return this;
   }
 
@@ -65,9 +67,9 @@ export class SceneManager implements ISceneManager {
   }
 
   public addGrid(size: number = 25): this {
-    this.gridHelper = new GridHelper(size, size, '#ccc', '#333');
+    this.gridHelper = new GridHelper(size + 5, size + 5, '#ccc', '#333');
     this.gridHelper.rotation.x = 1.5708; //90deg
-    this.gridHelper.position.z = -1;
+    this.gridHelper.position.z = -2;
     this.gridHelper.name = 'grid';
     this.scene.add(this.gridHelper);
     return this;
