@@ -1,15 +1,11 @@
 <template>
   <div class="app">
-    {{ errorCorrectionLevel }}
-    <v-tweakpane
-      class="tweakpane"
-      :pane="{ title: 'Configurations' }"
-      @on-pane-created="handlePaneCreated"
+    <custom-params
+      v-model="params"
+      @edit="handleParamsChange"
+      @export-seperate-stl="separateGeometrySTLExport"
+      @export-merge-stl="mergeGeometrySTLExport"
     />
-    <div class="bottom-actions">
-      <button @click="handleExportSTL">Export .STL format</button>
-      <button @click="handleExportGITF">Export .GITF format</button>
-    </div>
     <div id="canvas" ref="canvas"></div>
   </div>
 </template>
@@ -22,13 +18,15 @@ import { use3DQrcode } from './composables/use3DQrcode';
 import { SceneManager } from './classes/SceneManager';
 import { saveAs } from 'file-saver';
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter';
-import { VTweakpane } from 'v-tweakpane';
+import CustomParams from './components/CustomParams.vue';
 
 const canvas = ref();
-
 const { mesh, size, params } = use3DQrcode();
 const scene = new SceneManager();
 
+function handleParamsChange() {
+  scene.addQRCode(mesh.value, size.value);
+}
 onMounted(() => {
   scene
     .addRenderer()
@@ -46,57 +44,48 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', () => scene.resize());
 });
 
-function handlePaneCreated(pane: Pane) {
-  const qrcodePane = pane.addFolder({
-    title: 'QR Code',
-  });
-  qrcodePane.on('change', () => scene.addQRCode(mesh.value, size.value));
-  qrcodePane.addInput(params, 'content', { label: 'Value' });
-  qrcodePane.addInput(params, 'maskPattern', {
-    label: 'Mask pattern',
-    min: 0,
-    max: 9,
-    step: 1,
-  });
-  qrcodePane.addInput(params, 'errorCorrectionLevel', {
-    label: 'Correction',
-    options: {
-      Low: 'L',
-      Medium: 'M',
-      Quartile: 'Q',
-      High: 'H',
-    },
-  });
-}
-
-function handleExportSTL() {
+function mergeGeometrySTLExport() {
   try {
     const isFileSaverSupported = !!new Blob();
-    //HERE = Add plan export with second stl
     const buffer = exportSTL.fromMesh(mesh.value);
     saveAs(
       new Blob([buffer], { type: exportSTL.mimeType }),
-      `3D-print-${valueContent.value.trim()}-qrcode.stl`
+      `3D-print-${params.content.trim()}-qrcode.stl`
     );
   } catch (e) {
     console.error(e);
   }
 }
 
-function handleExportGITF() {
-  const exporter = new GLTFExporter();
-  exporter.parse(
-    scene.getScene(),
-    (gltf) => {
-      //TODO => Try fix export gltf
-      var file = new Blob([gltf], { type: 'text/plain' });
-      saveAs(file, `3D-print-${valueContent.value.trim()}-qrcode.gltf`);
-    },
-    (error) => {
-      console.error('An error happened');
-    }
-  );
+function seperateGeometrySTLExport() {
+  try {
+    const isFileSaverSupported = !!new Blob();
+    const buffer = exportSTL.fromMesh(mesh.value);
+    saveAs(
+      new Blob([buffer], { type: exportSTL.mimeType }),
+      `3D-print-${params.content.trim()}-qrcode.stl`
+    );
+  } catch (e) {
+    console.error(e);
+  }
 }
+
+/**
+ * TODO => Try fix export gltf
+  function handleExportGITF() {
+    const exporter = new GLTFExporter();
+    exporter.parse(
+      scene.getScene(),
+      (gltf) => {
+        var file = new Blob([gltf], { type: 'text/plain' });
+        saveAs(file, `3D-print-${params.content.trim()}-qrcode.gltf`);
+      },
+      (error) => {
+        console.error('An error happened');
+      }
+    );
+  }
+**/
 </script>
 
 <style scoped>
