@@ -1,39 +1,57 @@
-import * as THREE from 'three';
+import {
+  PerspectiveCamera,
+  WebGLRenderer,
+  Scene,
+  Mesh,
+  PCFSoftShadowMap,
+  BoxGeometry,
+  MeshStandardMaterial,
+  GridHelper,
+  PointLight,
+  AmbientLight,
+} from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 interface ISceneManager {
   addRenderer(): void;
-  setPlan(size: number): void;
+  addPlan(size: number): void;
   addControls(): void;
   addCamera(): void;
   addLights(): void;
-  addQRCode(mesh: THREE.Mesh, size: number): void;
+  refresh(mesh: Mesh, size: number): void;
   resize(): void;
-  getScene(): THREE.Scene;
+  getScene(): Scene;
   init(canvas: HTMLCanvasElement): void;
 }
 
-export class SceneManager implements ISceneManager {
-  scene = new THREE.Scene();
-  renderer = new THREE.WebGLRenderer();
-  controls: OrbitControls;
-  camera: THREE.PerspectiveCamera;
+interface RefreshPayload {
+  mesh: Mesh;
+  size: number;
+  merge: boolean;
+}
 
-  public getScene(): THREE.Scene {
+export class SceneManager implements ISceneManager {
+  scene = new Scene();
+  renderer = new WebGLRenderer();
+  controls: OrbitControls;
+  camera: PerspectiveCamera;
+  gridHelper: GridHelper;
+
+  public getScene(): Scene {
     return this.scene;
   }
 
   public addRenderer(): this {
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.type = PCFSoftShadowMap;
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     return this;
   }
 
-  public setPlan(size: number): this {
-    const plan = new THREE.Mesh(
-      new THREE.BoxGeometry(size + 2, size + 2, 1),
-      new THREE.MeshStandardMaterial({ color: 0x333333 })
+  public addPlan(size: number): this {
+    const plan = new Mesh(
+      new BoxGeometry(size + 2, size + 2, 1),
+      new MeshStandardMaterial({ color: 0x333333 })
     );
     plan.position.z = -1;
     plan.name = 'plan';
@@ -46,45 +64,50 @@ export class SceneManager implements ISceneManager {
     return this;
   }
 
-  public addGrid(): this {
-    const size = 25;
-    const gridHelper = new THREE.GridHelper(size, size, '#ccc', '#333');
-    gridHelper.rotation.x = 1.5708; //90deg
-    gridHelper.position.z = -1;
-    this.scene.add(gridHelper);
+  public addGrid(size: number = 25): this {
+    this.gridHelper = new GridHelper(size, size, '#ccc', '#333');
+    this.gridHelper.rotation.x = 1.5708; //90deg
+    this.gridHelper.position.z = -1;
+    this.gridHelper.name = 'grid';
+    this.scene.add(this.gridHelper);
     return this;
   }
 
   public addCamera(): this {
     const params = [50, window.innerWidth / window.innerHeight, 0.1, 1000];
-    this.camera = new THREE.PerspectiveCamera(...params);
+    this.camera = new PerspectiveCamera(...params);
     this.camera.position.z = 50;
     this.scene.add(this.camera);
     return this;
   }
 
   public addLights(): this {
-    const light = new THREE.AmbientLight(0xffffff, 0.3);
-    const pointLight = new THREE.PointLight(0xffffff, 1, 100);
+    const light = new AmbientLight(0xffffff, 0.3);
+    const pointLight = new PointLight(0xffffff, 1, 100);
     pointLight.position.set(1, 1, 10);
     this.scene.add(pointLight);
     this.scene.add(light);
     return this;
   }
 
-  public addQRCode(mesh: THREE.Mesh, planSize: number | boolean = false): this {
+  private clearAll(): void {
     this.scene.remove(this.scene.getObjectByName('qrcode'));
     this.scene.remove(this.scene.getObjectByName('plan'));
-    this.scene.add(mesh);
-    if (planSize) {
-      this.setPlan(planSize as number);
+    this.scene.remove(this.scene.getObjectByName('grid'));
+  }
+
+  public refresh(params: RefreshPayload): this {
+    this.clearAll();
+    this.scene.add(params.mesh);
+    this.addGrid(params.size);
+    if (!params.merge) {
+      this.addPlan(params.size as number);
     }
     return this;
   }
 
   public init(canvas: HTMLCanvasElement): this {
     canvas.appendChild(this.renderer.domElement);
-    //this.setPlan(23);
     this.animate();
     return this;
   }

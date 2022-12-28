@@ -24,9 +24,12 @@ const { mesh, size, params } = use3DQrcode();
 const scene = new SceneManager();
 
 function handleUpdate(value) {
-  console.log('update');
   Object.assign(params, value);
-  scene.addQRCode(mesh.value, !params.mergeGeometry && size.value);
+  scene.refresh({
+    mesh: mesh.value,
+    size: size.value,
+    merge: params.mergeGeometry,
+  });
 }
 
 onMounted(() => {
@@ -37,7 +40,11 @@ onMounted(() => {
     .addControls()
     .addLights()
     .init(canvas.value)
-    .addQRCode(mesh.value, !params.mergeGeometry && size.value);
+    .refresh({
+      mesh: mesh.value,
+      size: size.value,
+      merge: params.mergeGeometry,
+    });
   window.addEventListener('resize', () => scene.resize());
 });
 
