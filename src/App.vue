@@ -2,9 +2,8 @@
   <div class="app">
     <custom-params
       v-model="params"
-      @edit="handleParamsChange"
-      @export-seperate-stl="separateGeometrySTLExport"
-      @export-merge-stl="mergeGeometrySTLExport"
+      @update:modelValue="handleUpdate"
+      @export="handleExport"
     />
     <div id="canvas" ref="canvas"></div>
   </div>
@@ -24,9 +23,12 @@ const canvas = ref();
 const { mesh, size, params } = use3DQrcode();
 const scene = new SceneManager();
 
-function handleParamsChange() {
-  scene.addQRCode(mesh.value, size.value);
+function handleUpdate(value) {
+  console.log('update');
+  Object.assign(params, value);
+  scene.addQRCode(mesh.value, !params.mergeGeometry && size.value);
 }
+
 onMounted(() => {
   scene
     .addRenderer()
@@ -35,8 +37,7 @@ onMounted(() => {
     .addControls()
     .addLights()
     .init(canvas.value)
-    .addQRCode(mesh.value, size.value);
-
+    .addQRCode(mesh.value, !params.mergeGeometry && size.value);
   window.addEventListener('resize', () => scene.resize());
 });
 
@@ -57,7 +58,7 @@ function mergeGeometrySTLExport() {
   }
 }
 
-function seperateGeometrySTLExport() {
+function handleExport() {
   try {
     const isFileSaverSupported = !!new Blob();
     const buffer = exportSTL.fromMesh(mesh.value);

@@ -32,7 +32,7 @@ export class SceneManager implements ISceneManager {
 
   public setPlan(size: number): this {
     const plan = new THREE.Mesh(
-      new THREE.BoxGeometry(size, size, 1),
+      new THREE.BoxGeometry(size + 2, size + 2, 1),
       new THREE.MeshStandardMaterial({ color: 0x333333 })
     );
     plan.position.z = -1;
@@ -72,17 +72,19 @@ export class SceneManager implements ISceneManager {
     return this;
   }
 
-  public addQRCode(mesh: THREE.Mesh, size: number): this {
+  public addQRCode(mesh: THREE.Mesh, planSize: number | boolean = false): this {
     this.scene.remove(this.scene.getObjectByName('qrcode'));
     this.scene.remove(this.scene.getObjectByName('plan'));
     this.scene.add(mesh);
-    this.setPlan(size + 2);
+    if (planSize) {
+      this.setPlan(planSize as number);
+    }
     return this;
   }
 
   public init(canvas: HTMLCanvasElement): this {
     canvas.appendChild(this.renderer.domElement);
-    this.setPlan(23);
+    //this.setPlan(23);
     this.animate();
     return this;
   }

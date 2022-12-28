@@ -17,9 +17,15 @@ const props = defineProps({
   },
 });
 
+const emits = defineEmits<{
+  (e: 'update:modelValue', value: Object): void;
+  (e: 'edit'): void;
+  (e: 'exportSeperateStl'): void;
+  (e: 'exportMergeStl'): void;
+}>();
+
 const state = computed({
   set(value) {
-    console.log(value);
     emits('update:modelValue', value);
   },
   get() {
@@ -27,23 +33,22 @@ const state = computed({
   },
 });
 
-const emits = defineEmits<{
-  (e: 'update:modelValue', value: Object): void;
-  (e: 'edit');
-  (e: 'exportSeperateStl');
-  (e: 'exportMergeStl');
-}>();
-
 function handlePaneCreated(pane: Pane) {
-  const qrcodePane = pane.addFolder({
-    title: 'QR Code',
+  const qrcodePane = pane
+    .addFolder({
+      title: 'QR Code',
+    })
+    .on('change', () => {
+      emits('update:modelValue', state.value);
+    });
+
+  const content = qrcodePane.addInput(state.value, 'content', {
+    label: 'Value',
   });
 
-  qrcodePane.on('change', () => {
-    emits('edit');
+  content.element.addEventListener('input', (event: Event) => {
+    state.value = { ...state.value, content: event.target.value };
   });
-
-  qrcodePane.addInput(state.value, 'content', { label: 'Value' });
 
   qrcodePane.addInput(state.value, 'maskPattern', {
     label: 'Mask pattern',
@@ -66,16 +71,19 @@ function handlePaneCreated(pane: Pane) {
     title: 'Export',
   });
 
-  const mergeGeometryBtn = exportPane.addButton({
-    title: 'One geometry',
-    label: 'STL',
-  });
-  const separateGeometryBtn = exportPane.addButton({
-    title: 'Separate geometry',
-    label: '',
-  });
+  exportPane
+    .addInput(state.value, 'mergeGeometry', {
+      label: 'Merge geometry',
+    })
+    .on('change', () => {
+      emits('update:modelValue', state.value);
+    });
 
-  mergeGeometryBtn.on('click', () => emits('exportMergeStl'));
-  separateGeometryBtn.on('click', () => emits('exportSeperateStl'));
+  exportPane
+    .addButton({
+      title: 'Extract STL File',
+      label: 'STL',
+    })
+    .on('click', () => emits('export'));
 }
 </script>

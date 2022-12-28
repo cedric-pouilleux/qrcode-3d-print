@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@tweakpane/plugin-essentials": "^0.1.5",
-    "@types/qrcode": "^1.5.0",
     "file-saver": "^2.0.5",
     "qrcode": "^1.5.1",
     "three": "^0.148.0",
@@ -20,6 +19,7 @@
     "vue": "^3.2.45"
   },
   "devDependencies": {
+    "@types/qrcode": "^1.5.0",
     "@vitejs/plugin-vue": "^4.0.0",
     "typescript": "^4.9.3",
     "vite": "^4.0.0",
