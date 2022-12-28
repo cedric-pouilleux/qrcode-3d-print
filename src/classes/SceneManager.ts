@@ -41,6 +41,15 @@ export class SceneManager implements ISceneManager {
     return this;
   }
 
+  public addGrid(): this {
+    const size = 25;
+    const gridHelper = new THREE.GridHelper(size, size, '#ccc', '#333');
+    gridHelper.rotation.x = 1.5708; //90deg
+    gridHelper.position.z = -1;
+    this.scene.add(gridHelper);
+    return this;
+  }
+
   public addCamera(): this {
     const params = [50, window.innerWidth / window.innerHeight, 0.1, 1000];
     this.camera = new THREE.PerspectiveCamera(...params);

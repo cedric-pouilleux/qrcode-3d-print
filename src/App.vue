@@ -26,6 +26,7 @@ const scene = new SceneManager();
 onMounted(() => {
   scene
     .addRenderer()
+    .addGrid()
     .addCamera()
     .addControls()
     .addLights()
