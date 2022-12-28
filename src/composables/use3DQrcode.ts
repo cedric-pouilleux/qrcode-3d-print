@@ -1,23 +1,37 @@
-import { computed, ref, Ref, ComputedRef } from 'vue';
-import { create, BitMatrix, QRCodeErrorCorrectionLevel } from 'qrcode';
+import { computed, ref, Ref, ComputedRef, reactive } from 'vue';
+import {
+  create,
+  BitMatrix,
+  QRCodeErrorCorrectionLevel,
+  QRCodeMaskPattern,
+} from 'qrcode';
 import * as THREE from 'three';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+
+interface Use3DQrcodeParams {
+  content: string;
+  errorCorrectionLevel: QRCodeErrorCorrectionLevel;
+  maskPattern: QRCodeMaskPattern;
+}
 
 interface IUse3DQrcode {
   mesh: ComputedRef<THREE.Mesh>;
   size: ComputedRef<number>;
-  content: Ref<string>;
-  errorCorrectionLevel: Ref<string>;
+  params: Use3DQrcodeParams;
 }
 
 export function use3DQrcode(): IUse3DQrcode {
-  const content = ref<string>('Start writing');
-  const errorCorrectionLevel = ref<QRCodeErrorCorrectionLevel>('M');
+  const params = reactive<Use3DQrcodeParams>({
+    content: 'Start writing',
+    errorCorrectionLevel: 'M',
+    maskPattern: 0,
+  });
 
   const getContent = computed(
     (): BitMatrix =>
-      create(content.value, {
-        errorCorrectionLevel: errorCorrectionLevel.value,
+      create(params.content, {
+        errorCorrectionLevel: params.errorCorrectionLevel,
+        maskPattern: params.maskPattern,
       }).modules
   );
   const size = computed((): number => getContent.value.size);
@@ -63,8 +77,7 @@ export function use3DQrcode(): IUse3DQrcode {
 
   return {
     mesh,
-    content,
+    params,
     size,
-    errorCorrectionLevel,
   };
 }

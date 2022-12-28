@@ -26,13 +26,8 @@ import { VTweakpane } from 'v-tweakpane';
 
 const canvas = ref();
 
-const { mesh, size, content, errorCorrectionLevel } = use3DQrcode();
+const { mesh, size, params } = use3DQrcode();
 const scene = new SceneManager();
-
-const params = reactive({
-  content,
-  errorCorrectionLevel,
-});
 
 onMounted(() => {
   scene
@@ -51,19 +46,18 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', () => scene.resize());
 });
 
-watch(
-  params,
-  () => {
-    scene.addQRCode(mesh.value, size.value);
-  },
-  { deep: true }
-);
-
 function handlePaneCreated(pane: Pane) {
   const qrcodePane = pane.addFolder({
     title: 'QR Code',
   });
+  qrcodePane.on('change', () => scene.addQRCode(mesh.value, size.value));
   qrcodePane.addInput(params, 'content', { label: 'Value' });
+  qrcodePane.addInput(params, 'maskPattern', {
+    label: 'Mask pattern',
+    min: 0,
+    max: 9,
+    step: 1,
+  });
   qrcodePane.addInput(params, 'errorCorrectionLevel', {
     label: 'Correction',
     options: {
