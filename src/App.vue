@@ -2,62 +2,54 @@
   <div class="app">
     <custom-params
       v-model="params"
-      @update:modelValue="handleUpdate"
-      @export="handleExport"
+      @update:modelValue="handleUpdateParams"
+      @stl-export="handleExport"
     />
-    <div id="canvas" ref="canvas"></div>
+    <view-scene
+      :qrcode="generatedQrcode.data"
+      :qrcode-size="generatedQrcode.size"
+      :plan-color="params.planColor"
+      :mesh-color="params.color"
+      :meshs-merge="params.mergeGeometry"
+      @edit-printable="printableObjects = $event"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount, reactive } from 'vue';
+import { reactive, computed, ref } from 'vue';
 import { use3DQrcode } from './composables/use3DQrcode';
 import { useExports } from './composables/useExports';
-import { SceneManager } from './classes/SceneManager';
+import { appParams } from './params';
+import { create, BitMatrix } from 'qrcode';
 import CustomParams from './components/CustomParams.vue';
+import ViewScene from './components/ViewScene.vue';
 
-const canvas = ref();
-const { mesh, size, params } = use3DQrcode();
+const params = reactive(appParams);
+
+const printableObjects = ref<Array<Mesh>>([]);
+
+const generatedQrcode = computed(
+  (): BitMatrix =>
+    create(params.content, {
+      errorCorrectionLevel: params.errorCorrectionLevel,
+      maskPattern: params.maskPattern,
+    }).modules
+);
+
 const { exportGeometry, exportPlan } = useExports(params.content);
 
-const scene = new SceneManager();
-
-function handleUpdate(value) {
-  Object.assign(params, value);
-  scene.refresh({
-    mesh: mesh.value,
-    size: size.value,
-    merge: params.mergeGeometry,
-    planColor: params.planColor,
-  });
+function handleExport() {
+  const qrcodeMesh = printableObjects.value[0];
+  exportGeometry(qrcodeMesh);
+  if (!params.mergeGeometry) {
+    const planMesh = printableObjects.value[1];
+    exportPlan(planMesh);
+  }
 }
 
-onMounted(() => {
-  scene
-    .addRenderer()
-    .addGrid()
-    .addCamera()
-    .addControls()
-    .addLights()
-    .init(canvas.value)
-    .refresh({
-      mesh: mesh.value,
-      size: size.value,
-      merge: params.mergeGeometry,
-      planColor: params.planColor,
-    });
-  window.addEventListener('resize', () => scene.resize());
-});
-
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', () => scene.resize());
-});
-
-function handleExport() {
-  exportGeometry(mesh.value);
-  if (!params.mergeGeometry) {
-    exportPlan(scene.plan);
-  }
+function handleUpdateParams(event: Use3DQrcodeParams) {
+  Object.assign(params, event);
 }
 </script>
 

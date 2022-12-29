@@ -9,19 +9,15 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { VTweakpane } from 'v-tweakpane';
+import { object } from 'vue-types';
 
 const props = defineProps({
-  modelValue: {
-    type: Object,
-    required: true,
-  },
+  modelValue: object<Use3DQrcodeParams>().isRequired,
 });
 
 const emits = defineEmits<{
   (e: 'update:modelValue', value: Object): void;
-  (e: 'edit'): void;
-  (e: 'exportSeperateStl'): void;
-  (e: 'exportMergeStl'): void;
+  (e: 'stl-export'): void;
 }>();
 
 const state = computed({
@@ -33,9 +29,8 @@ const state = computed({
   },
 });
 
-function handlePaneCreated(pane: Pane) {
+function handlePaneCreated(pane: Pane): void {
   pane.on('change', () => {
-    console.log('t');
     emits('update:modelValue', state.value);
   });
 
@@ -48,6 +43,7 @@ function handlePaneCreated(pane: Pane) {
   });
 
   content.element.addEventListener('input', (event: Event) => {
+    console.log('i');
     state.value = { ...state.value, content: event.target.value };
   });
 
@@ -85,7 +81,7 @@ function handlePaneCreated(pane: Pane) {
       title: 'Extract STL File',
       label: 'STL',
     })
-    .on('click', () => emits('export'));
+    .on('click', () => emits('stl-export'));
 
   const goemetryPane = pane.addFolder({
     title: 'Geometry',
@@ -100,13 +96,5 @@ function handlePaneCreated(pane: Pane) {
     label: 'Plan Color',
     view: 'color',
   });
-
-  /**
-  goemetryPane.addInput(state.value, 'height', {
-    label: 'Mask pattern',
-    min: 3,
-    max: 40,
-    step: 1,
-  });**/
 }
 </script>
