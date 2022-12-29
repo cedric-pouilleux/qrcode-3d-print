@@ -29,6 +29,7 @@ interface RefreshPayload {
   mesh: Mesh;
   size: number;
   merge: boolean;
+  planColor: number;
 }
 
 export class SceneManager implements ISceneManager {
@@ -50,12 +51,14 @@ export class SceneManager implements ISceneManager {
     return this;
   }
 
-  public addPlan(size: number): this {
+  public addPlan(size: number, color: number = 0x333333): this {
     this.plan = new Mesh(
       new BoxGeometry(size + 2, size + 2, 1),
-      new MeshStandardMaterial({ color: 0x333333 })
+      new MeshStandardMaterial({ color })
     );
-    this.plan.position.z = -1;
+    this.plan.castShadow = true;
+    this.plan.receiveShadow = true;
+    this.plan.position.z = -1.5;
     this.plan.name = 'plan';
     this.scene.add(this.plan);
     return this;
@@ -85,7 +88,7 @@ export class SceneManager implements ISceneManager {
 
   public addLights(): this {
     const light = new AmbientLight(0xffffff, 0.3);
-    const pointLight = new PointLight(0xffffff, 1, 100);
+    const pointLight = new PointLight(0xffffff, 15, 50);
     pointLight.position.set(1, 1, 10);
     this.scene.add(pointLight);
     this.scene.add(light);
@@ -103,7 +106,7 @@ export class SceneManager implements ISceneManager {
     this.scene.add(params.mesh);
     this.addGrid(params.size);
     if (!params.merge) {
-      this.addPlan(params.size as number);
+      this.addPlan(params.size as number, params.planColor);
     }
     return this;
   }

@@ -34,13 +34,14 @@ const state = computed({
 });
 
 function handlePaneCreated(pane: Pane) {
-  const qrcodePane = pane
-    .addFolder({
-      title: 'QR Code',
-    })
-    .on('change', () => {
-      emits('update:modelValue', state.value);
-    });
+  pane.on('change', () => {
+    console.log('t');
+    emits('update:modelValue', state.value);
+  });
+
+  const qrcodePane = pane.addFolder({
+    title: 'QR Code',
+  });
 
   const content = qrcodePane.addInput(state.value, 'content', {
     label: 'Value',
@@ -85,5 +86,27 @@ function handlePaneCreated(pane: Pane) {
       label: 'STL',
     })
     .on('click', () => emits('export'));
+
+  const goemetryPane = pane.addFolder({
+    title: 'Geometry',
+  });
+
+  goemetryPane.addInput(state.value, 'color', {
+    label: 'Color',
+    view: 'color',
+  });
+
+  goemetryPane.addInput(state.value, 'planColor', {
+    label: 'Plan Color',
+    view: 'color',
+  });
+
+  /**
+  goemetryPane.addInput(state.value, 'height', {
+    label: 'Mask pattern',
+    min: 3,
+    max: 40,
+    step: 1,
+  });**/
 }
 </script>

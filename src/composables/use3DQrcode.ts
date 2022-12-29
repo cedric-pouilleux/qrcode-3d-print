@@ -5,7 +5,13 @@ import {
   QRCodeErrorCorrectionLevel,
   QRCodeMaskPattern,
 } from 'qrcode';
-import { BufferGeometry, BoxGeometry, Mesh, MeshStandardMaterial } from 'three';
+import {
+  BufferGeometry,
+  BoxGeometry,
+  Mesh,
+  MeshStandardMaterial,
+  MeshNormalMaterial,
+} from 'three';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
 interface Use3DQrcodeParams {
@@ -13,6 +19,10 @@ interface Use3DQrcodeParams {
   errorCorrectionLevel: QRCodeErrorCorrectionLevel;
   maskPattern: QRCodeMaskPattern;
   mergeGeometry: boolean;
+  height: number;
+  planHeight: number;
+  color: number;
+  planColor: number;
 }
 
 interface IUse3DQrcode {
@@ -26,7 +36,11 @@ export function use3DQrcode(): IUse3DQrcode {
     content: 'Start writing',
     errorCorrectionLevel: 'M',
     maskPattern: 0,
-    mergeGeometry: true,
+    mergeGeometry: false,
+    height: 5,
+    planHeight: 1,
+    color: 0x000000,
+    planColor: 0xffffff,
   });
 
   const getContent = computed(
@@ -42,12 +56,13 @@ export function use3DQrcode(): IUse3DQrcode {
     const plan = new BoxGeometry(
       getContent.value.size + 2,
       getContent.value.size + 2,
-      1
+      params.planHeight
     );
+    plan.receiveShadow = true;
     plan.translate(
       Math.round(getContent.value.size / 2) - 1,
       Math.round(getContent.value.size / 2) - 1,
-      -2
+      -1.5
     );
     return plan;
   });
@@ -80,7 +95,9 @@ export function use3DQrcode(): IUse3DQrcode {
   function conbinateMesh(): Mesh {
     return new Mesh(
       BufferGeometryUtils.mergeBufferGeometries(geometryArray.value),
-      new MeshStandardMaterial({ color: 0xffffff })
+      new MeshStandardMaterial({
+        color: params.color,
+      })
     );
   }
 
@@ -89,7 +106,7 @@ export function use3DQrcode(): IUse3DQrcode {
     const positions = Math.round(-getContent.value.size / 2);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
-    mesh.position.set(positions, positions, 1);
+    mesh.position.set(positions, positions, 0);
     mesh.name = 'qrcode';
     return mesh;
   });

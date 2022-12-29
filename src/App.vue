@@ -28,6 +28,7 @@ function handleUpdate(value) {
     mesh: mesh.value,
     size: size.value,
     merge: params.mergeGeometry,
+    planColor: params.planColor,
   });
 }
 
@@ -43,6 +44,7 @@ onMounted(() => {
       mesh: mesh.value,
       size: size.value,
       merge: params.mergeGeometry,
+      planColor: params.planColor,
     });
   window.addEventListener('resize', () => scene.resize());
 });
