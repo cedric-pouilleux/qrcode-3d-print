@@ -9,15 +9,11 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { integer, number, instanceOf, bool, array } from 'vue-types';
 import { useGeometryBuilder } from '../composables/useGeometryBuilder';
 import { Qrcodes } from './types';
-import {
-  CSS2DObject,
-  CSS2DRenderer,
-} from 'three/examples/jsm/renderers/CSS2DRenderer';
 
 const {
-  gridHelper,
-  generateMeshPlan,
-  generateMeshQrcode,
+  generateGrid,
+  generatePlan,
+  generateQrcode,
   generateCamera,
   generateLight,
   generateBufferGeometry,
@@ -44,10 +40,8 @@ const scene = new THREE.Scene();
 const renderer = new THREE.WebGLRenderer();
 const camera = generateCamera(50);
 const controls = new OrbitControls(camera, renderer.domElement);
-const light = new THREE.AmbientLight(0xcccccc); // soft white light
-
+const light = new THREE.AmbientLight(0xcccccc);
 const pointLight = generateLight();
-
 renderer.setSize(window.innerWidth, window.innerHeight);
 scene.add(camera);
 
@@ -68,14 +62,14 @@ function clearSceneMeshs() {
   }
 }
 
-const grid = computed(() => gridHelper(props.qrcodeSize));
+const grid = computed(() => generateGrid(props.qrcodeSize));
 
 function qrcode(qrcode: Qrcodes): THREE.Mesh {
   const buffer = generateBufferGeometry({
     qrcode: qrcode.data,
     size: qrcode.size,
   });
-  const mesh = generateMeshQrcode({
+  const mesh = generateQrcode({
     buffer,
     size: qrcode.size,
     color: props.meshColor,
@@ -84,15 +78,13 @@ function qrcode(qrcode: Qrcodes): THREE.Mesh {
   return mesh;
 }
 
-function generateQrcodes() {
+function prepareQrcodeGroup(qrcodes) {
+  const group = new THREE.Group();
   let row = 0;
   let col = 0;
-  const group = new THREE.Group();
   const margin = 3;
-
-  const count = props.isArray ? props.meshArray : props.qrcodes.length;
+  const count = qrcodes.length;
   const rowCount = Math.round(Math.sqrt(count));
-
   for (let index = 0; index < count; index++) {
     const innerGroup = new THREE.Group();
     if (index) {
@@ -103,21 +95,28 @@ function generateQrcodes() {
         row++;
       }
     }
+    innerGroup.add(qrcode(qrcodes[index]));
     innerGroup.add(
-      qrcode(props.isArray ? props.qrcodes[0] : props.qrcodes[index])
-    );
-    innerGroup.add(
-      generateMeshPlan({
+      generatePlan({
         size: props.qrcodeSize,
         color: 0xffffff,
-        geometryOnly: true,
       })
     );
     innerGroup.position.x = col * (props.qrcodeSize + margin);
     innerGroup.position.y = row * (props.qrcodeSize + margin);
     group.add(innerGroup);
   }
+  return group;
+}
 
+const duplicateQrcodes = computed(() =>
+  new Array(props.meshArray).fill(undefined).map((_) => props.qrcodes[0])
+);
+
+function generateQrcodes() {
+  const group = prepareQrcodeGroup(
+    props.isArray ? duplicateQrcodes.value : props.qrcodes
+  );
   const boundingBox = new THREE.Box3().setFromObject(group);
   group.position.sub(boundingBox.getCenter(new THREE.Vector3()));
   return group;

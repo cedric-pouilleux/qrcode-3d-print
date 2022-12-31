@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
-type GenerateMeshPlanPayload = {
+type GeneratePlanPayload = {
   size: number;
   color: number;
   geometryOnly: boolean;
@@ -19,9 +19,9 @@ type GenerateBufferGeometryPayload = {
 };
 
 interface IUseGeometry {
-  gridHelper(size: number): THREE.GridHelper;
-  generateMeshPlan(payload: GenerateMeshPlanPayload): THREE.Mesh;
-  generateMeshQrcode(payload: GenerateMeshQrcodePayload): THREE.Mesh;
+  generateGrid(): THREE.GridHelper;
+  generatePlan(payload: GeneratePlanPayload): THREE.Mesh;
+  generateQrcode(payload: GenerateMeshQrcodePayload): THREE.Mesh;
   generateCamera(startPosition: number): THREE.PerspectiveCamera;
   generateLight(): THREE.PointLight;
   generateBufferGeometry(
@@ -30,15 +30,15 @@ interface IUseGeometry {
 }
 
 export function useGeometryBuilder(): IUseGeometry {
-  function gridHelper(size: number): THREE.GridHelper {
+  function generateGrid(): THREE.GridHelper {
     const gridHelper = new THREE.GridHelper(130, 50, '#ccc', '#333');
     gridHelper.rotation.x = 1.5708; //90deg
     gridHelper.position.z = -2;
     return gridHelper;
   }
 
-  function generateMeshPlan(
-    payload: GenerateMeshPlanPayload
+  function generatePlan(
+    payload: GeneratePlanPayload
   ): THREE.BoxGeometry | THREE.Mesh {
     const corrected = payload.size + 2;
     const plan = new THREE.Mesh(
@@ -50,7 +50,7 @@ export function useGeometryBuilder(): IUseGeometry {
     return plan;
   }
 
-  function generateMeshQrcode(payload: GenerateMeshQrcodePayload): THREE.Mesh {
+  function generateQrcode(payload: GenerateMeshQrcodePayload): THREE.Mesh {
     const mesh = new THREE.Mesh(
       BufferGeometryUtils.mergeBufferGeometries(payload.buffer),
       new THREE.MeshStandardMaterial({
@@ -106,9 +106,9 @@ export function useGeometryBuilder(): IUseGeometry {
   }
 
   return {
-    gridHelper,
-    generateMeshPlan,
-    generateMeshQrcode,
+    generateGrid,
+    generatePlan,
+    generateQrcode,
     generateCamera,
     generateLight,
     generateBufferGeometry,
