@@ -38,7 +38,7 @@ const canvas = ref(null);
 
 const scene = new THREE.Scene();
 const renderer = new THREE.WebGLRenderer();
-const camera = generateCamera(50);
+const camera = generateCamera();
 const controls = new OrbitControls(camera, renderer.domElement);
 const light = new THREE.AmbientLight(0xcccccc);
 const pointLight = generateLight();
@@ -65,30 +65,24 @@ function clearSceneMeshs() {
 const grid = computed(() => generateGrid(props.qrcodeSize));
 
 function qrcode(qrcode: Qrcodes): THREE.Mesh {
-  const buffer = generateBufferGeometry({
-    qrcode: qrcode.data,
-    size: qrcode.size,
-  });
   const mesh = generateQrcode({
-    buffer,
+    qrcode: qrcode.data,
     size: qrcode.size,
     color: props.meshColor,
   });
-  mesh.geometry.center();
   return mesh;
 }
 
-function prepareQrcodeGroup(qrcodes) {
+function prepareQrcodeGroup(qrcodes, size) {
   const group = new THREE.Group();
   let row = 0;
   let col = 0;
   const margin = 3;
   const count = qrcodes.length;
-  const rowCount = Math.round(Math.sqrt(count));
   for (let index = 0; index < count; index++) {
     const innerGroup = new THREE.Group();
     if (index) {
-      if (index % rowCount === 0) {
+      if (index % Math.sqrt(count) === 0) {
         col++;
         row = 0;
       } else {
@@ -98,12 +92,12 @@ function prepareQrcodeGroup(qrcodes) {
     innerGroup.add(qrcode(qrcodes[index]));
     innerGroup.add(
       generatePlan({
-        size: props.qrcodeSize,
+        size,
         color: 0xffffff,
       })
     );
-    innerGroup.position.x = col * (props.qrcodeSize + margin);
-    innerGroup.position.y = row * (props.qrcodeSize + margin);
+    innerGroup.position.x = col * (size + margin);
+    innerGroup.position.y = row * (size + margin);
     group.add(innerGroup);
   }
   return group;
@@ -115,7 +109,8 @@ const duplicateQrcodes = computed(() =>
 
 function generateQrcodes() {
   const group = prepareQrcodeGroup(
-    props.isArray ? duplicateQrcodes.value : props.qrcodes
+    props.isArray ? duplicateQrcodes.value : props.qrcodes,
+    props.qrcodeSize
   );
   const boundingBox = new THREE.Box3().setFromObject(group);
   group.position.sub(boundingBox.getCenter(new THREE.Vector3()));

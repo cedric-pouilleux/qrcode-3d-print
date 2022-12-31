@@ -8,7 +8,7 @@ type GeneratePlanPayload = {
 };
 
 type GenerateMeshQrcodePayload = {
-  buffer: THREE.BufferGeometry;
+  qrcode: Uint8Array;
   size: number;
   color: number;
 };
@@ -51,14 +51,19 @@ export function useGeometryBuilder(): IUseGeometry {
   }
 
   function generateQrcode(payload: GenerateMeshQrcodePayload): THREE.Mesh {
+    const buffer = generateBufferGeometry({
+      qrcode: payload.qrcode,
+      size: payload.size,
+    });
     const mesh = new THREE.Mesh(
-      BufferGeometryUtils.mergeBufferGeometries(payload.buffer),
+      BufferGeometryUtils.mergeBufferGeometries(buffer),
       new THREE.MeshStandardMaterial({
         color: payload.color,
       })
     );
     mesh.position.set(0, 0, 0);
     mesh.name = 'qrcode';
+    mesh.geometry.center();
     return mesh;
   }
 
@@ -68,7 +73,7 @@ export function useGeometryBuilder(): IUseGeometry {
     return pointLight;
   }
 
-  function generateCamera(startPosition: number): THREE.PerspectiveCamera {
+  function generateCamera(): THREE.PerspectiveCamera {
     const camera = new THREE.PerspectiveCamera(
       10,
       window.innerWidth / window.innerHeight,
