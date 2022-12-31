@@ -23,7 +23,7 @@ export function useExports(): IUseExports {
   function save(buffer: string, fileName: string) {
     saveAs(
       new Blob([buffer], { type: STLExporter.mimeType }),
-      fileName + 'stl'
+      fileName + '.stl'
     );
   }
 
