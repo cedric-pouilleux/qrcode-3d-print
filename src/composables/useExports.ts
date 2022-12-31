@@ -6,17 +6,7 @@ interface IUseExports {
   exportGeometries(scene: THREE.Scene, merge: Boolean): void;
 }
 
-export function useExports(content: string): IUseExports {
-  function exportPlans(scene: THREE.Scene): THREE.Group {
-    const group = new THREE.Group();
-    scene.traverseVisible((item: any) => {
-      if (item.name === 'plan') {
-        group.add(item.clone());
-      }
-    });
-    return group;
-  }
-
+export function useExports(): IUseExports {
   function selectExportable(
     scene: THREE.Scene,
     type: 'plan' | 'qrcode'
