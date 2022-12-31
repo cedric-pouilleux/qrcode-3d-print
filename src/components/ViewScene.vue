@@ -70,60 +70,30 @@ function clearSceneMeshs() {
 
 const grid = computed(() => gridHelper(props.qrcodeSize));
 
-function qrcode(): THREE.Mesh {
+function qrcode(qrcode: Qrcodes): THREE.Mesh {
   const buffer = generateBufferGeometry({
-    qrcode: props.qrcode,
-    size: props.qrcodeSize,
+    qrcode: qrcode.data,
+    size: qrcode.size,
   });
-  if (props.meshsMerge) {
-    buffer.push(
-      generateMeshPlan({
-        size: props.qrcodeSize,
-        color: props.planColor,
-        geometryOnly: true,
-      })
-    );
-  }
   const mesh = generateMeshQrcode({
     buffer,
-    size: props.qrcodeSize,
-    color: props.meshColor,
-  });
-  mesh.name = 'qrcode';
-  mesh.geometry.center();
-  return mesh;
-}
-
-function qrcodes(selectedQrcode): THREE.Mesh {
-  const buffer = generateBufferGeometry({
-    qrcode: selectedQrcode.data,
-    size: selectedQrcode.size,
-  });
-  if (props.meshsMerge) {
-    buffer.push(
-      generateMeshPlan({
-        size: selectedQrcode.size,
-        color: props.planColor,
-        geometryOnly: true,
-      })
-    );
-  }
-  const mesh = generateMeshQrcode({
-    buffer,
-    size: selectedQrcode.size,
+    size: qrcode.size,
     color: props.meshColor,
   });
   mesh.geometry.center();
   return mesh;
 }
 
-function generateGroupOfQrcode() {
+function generateQrcodes() {
   let row = 0;
   let col = 0;
   const group = new THREE.Group();
   const margin = 3;
-  const rowCount = Math.round(Math.sqrt(props.meshArray));
-  for (let index = 0; index < props.meshArray; index++) {
+
+  const count = props.isArray ? props.meshArray : props.qrcodes.length;
+  const rowCount = Math.round(Math.sqrt(count));
+
+  for (let index = 0; index < count; index++) {
     const innerGroup = new THREE.Group();
     if (index) {
       if (index % rowCount === 0) {
@@ -133,50 +103,16 @@ function generateGroupOfQrcode() {
         row++;
       }
     }
-    const added = qrcode();
-    innerGroup.add(added);
-    if (!props.meshsMerge) {
-      const plan = generateMeshPlan({
+    innerGroup.add(
+      qrcode(props.isArray ? props.qrcodes[0] : props.qrcodes[index])
+    );
+    innerGroup.add(
+      generateMeshPlan({
         size: props.qrcodeSize,
-        color: props.planColor,
-      });
-      innerGroup.add(plan);
-    }
-    innerGroup.position.x = col * (props.qrcodeSize + margin);
-    innerGroup.position.y = row * (props.qrcodeSize + margin);
-    group.add(innerGroup);
-  }
-  const boundingBox = new THREE.Box3().setFromObject(group);
-  group.position.sub(boundingBox.getCenter(new THREE.Vector3()));
-  return group;
-}
-
-function generateGroupOfQrcodes() {
-  let row = 0;
-  let col = 0;
-  const group = new THREE.Group();
-  const margin = 3;
-  const rowCount = Math.round(Math.sqrt(props.qrcodes.length));
-  for (let index = 0; index < props.qrcodes.length; index++) {
-    const innerGroup = new THREE.Group();
-    if (index) {
-      if (index % rowCount === 0) {
-        col++;
-        row = 0;
-      } else {
-        row++;
-      }
-    }
-    const added = qrcodes(props.qrcodes[index]);
-    innerGroup.add(added);
-    if (!props.meshsMerge) {
-      const plan = generateMeshPlan({
-        size: props.qrcodeSize,
-        color: props.planColor,
-      });
-      //exposePrintableMesh.push(plan);
-      innerGroup.add(plan);
-    }
+        color: 0xffffff,
+        geometryOnly: true,
+      })
+    );
     innerGroup.position.x = col * (props.qrcodeSize + margin);
     innerGroup.position.y = row * (props.qrcodeSize + margin);
     group.add(innerGroup);
@@ -187,31 +123,10 @@ function generateGroupOfQrcodes() {
   return group;
 }
 
-/**
- * Refresh actions
- **/
 function refresh(params: RefreshPayload): void {
   clearSceneMeshs();
   generateScene();
-
-  if (props.isArray) {
-    const group = generateGroupOfQrcode();
-    scene.add(group);
-  } else if (props.qrcodes) {
-    const group = generateGroupOfQrcodes();
-    scene.add(group);
-  } else {
-    const added = qrcode();
-    if (!props.meshsMerge) {
-      scene.add(
-        generateMeshPlan({
-          size: props.qrcodeSize,
-          color: props.planColor,
-        })
-      );
-    }
-    scene.add(added);
-  }
+  scene.add(generateQrcodes());
 }
 
 function generateScene() {

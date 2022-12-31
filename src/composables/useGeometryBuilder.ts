@@ -40,19 +40,12 @@ export function useGeometryBuilder(): IUseGeometry {
   function generateMeshPlan(
     payload: GenerateMeshPlanPayload
   ): THREE.BoxGeometry | THREE.Mesh {
-    let plan: THREE.BoxGeometry | THREE.Mesh;
     const corrected = payload.size + 2;
-    if (payload.geometryOnly) {
-      plan = new THREE.BoxGeometry(corrected, corrected, 1);
-      const rounded = Math.round(payload.size / 2);
-      plan.translate(rounded - 1, rounded - 1, -1.5);
-    } else {
-      plan = new THREE.Mesh(
-        new THREE.BoxGeometry(corrected, corrected, 1),
-        new THREE.MeshStandardMaterial({ color: payload.color })
-      );
-      plan.position.z = -1.5;
-    }
+    const plan = new THREE.Mesh(
+      new THREE.BoxGeometry(corrected, corrected, 1),
+      new THREE.MeshStandardMaterial({ color: payload.color })
+    );
+    plan.position.z = -1.5;
     plan.name = 'plan';
     return plan;
   }

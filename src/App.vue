@@ -33,13 +33,7 @@ import * as exportSTL from 'threejs-export-stl';
 const params = reactive(appParams);
 
 //@TODO
-const codes = ref([
-  'printable',
-  'ViewScene',
-  'Customsd',
-  'nexestes',
-  'tchuslol',
-]);
+const codes = ref(['printable']);
 
 const printableObjects = ref<Array<Mesh>>([]);
 
