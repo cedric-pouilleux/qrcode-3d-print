@@ -30,21 +30,8 @@ const state = computed({
 });
 
 function handlePaneCreated(pane: Pane): void {
-  pane.on('change', () => {
-    emits('update:modelValue', state.value);
-  });
-
   const qrcodePane = pane.addFolder({
     title: 'QR Code',
-  });
-
-  const content = qrcodePane.addInput(state.value, 'content', {
-    label: 'Value',
-  });
-
-  content.element.addEventListener('input', (event: Event) => {
-    console.log('i');
-    state.value = { ...state.value, content: event.target.value };
   });
 
   qrcodePane.addInput(state.value, 'maskPattern', {
@@ -65,16 +52,12 @@ function handlePaneCreated(pane: Pane): void {
   });
 
   const exportPane = pane.addFolder({
-    title: 'Export',
+    title: 'Pritn export',
   });
 
-  exportPane
-    .addInput(state.value, 'mergeGeometry', {
-      label: 'Merge geometry',
-    })
-    .on('change', () => {
-      emits('update:modelValue', state.value);
-    });
+  exportPane.addInput(state.value, 'mergeGeometry', {
+    label: 'Merge geometry',
+  });
 
   exportPane
     .addButton({
@@ -83,8 +66,30 @@ function handlePaneCreated(pane: Pane): void {
     })
     .on('click', () => emits('stl-export'));
 
+  const cloneArrayPane = pane.addFolder({
+    title: 'Print duplication',
+  });
+
+  cloneArrayPane.addInput(state.value, 'isArray', {
+    label: 'Duplicate',
+  });
+
+  const content = cloneArrayPane.addInput(state.value, 'content', {
+    label: 'qrcode',
+  });
+
+  cloneArrayPane.addInput(state.value, 'meshArray', {
+    label: 'Array by',
+    options: {
+      ['Per 4']: 4,
+      ['Per 9']: 9,
+      ['Per 16']: 16,
+      ['Per 25']: 25,
+    },
+  });
+
   const goemetryPane = pane.addFolder({
-    title: 'Geometry',
+    title: 'Visualisation',
   });
 
   goemetryPane.addInput(state.value, 'color', {

@@ -1,37 +1,58 @@
-import { Mesh } from 'three';
+import * as THREE from 'three';
+import { computed } from 'vue';
 import { saveAs } from 'file-saver';
-import * as exportSTL from 'threejs-export-stl';
+import { STLExporter } from 'three/addons/exporters/STLExporter.js';
 
 interface IUseExports {
-  exportGeometry(mesh: Mesh): void;
-  exportPlan(plan: Mesh): void;
+  exportGeometries(scene: THREE.Scene, merge: BooleanConstructor): void;
 }
 
 export function useExports(content: string): IUseExports {
-  try {
-    !!new Blob();
-  } catch (e) {
-    console.error(e);
+  function exportPlans(scene: THREE.Scene): THREE.Group {
+    const group = new THREE.Group();
+    scene.traverseVisible((item: any) => {
+      if (item.name === 'plan') {
+        group.add(item.clone());
+      }
+    });
+    return group;
   }
 
-  function exportGeometry(mesh: Mesh) {
-    const buffer = exportSTL.fromMesh(mesh);
-    saveAs(
-      new Blob([buffer], { type: exportSTL.mimeType }),
-      `3D-print-${content.trim()}-qrcode.stl`
-    );
+  function exportMeshs(scene: THREE.Scene): THREE.Group {
+    const group = new THREE.Group();
+    scene.traverseVisible((item: any) => {
+      if (item.name === 'qrcode') {
+        group.add(item.clone());
+      }
+    });
+    return group;
   }
 
-  function exportPlan(plan: Mesh) {
-    const planBuffer = exportSTL.fromMesh(plan);
-    saveAs(
-      new Blob([planBuffer], { type: exportSTL.mimeType }),
-      `3D-print-${content.trim()}-qrcode-plan.stl`
-    );
+  function exportGeometries(scene: THREE.Scene, merge: boolean): void {
+    const exporter = new STLExporter();
+    if (merge) {
+      const buffer = exporter.parse(scene);
+      saveAs(
+        new Blob([buffer], { type: STLExporter.mimeType }),
+        `3D-print-${content.trim()}-qrcode-all.stl`
+      );
+    } else {
+      const plans = exportPlans(scene);
+      const plansBuffer = exporter.parse(plans);
+      saveAs(
+        new Blob([plansBuffer], { type: STLExporter.mimeType }),
+        `3D-print-${content.trim()}-qrcode-plan.stl`
+      );
+      const meshs = exportMeshs(scene);
+      const meshsBuffer = exporter.parse(meshs);
+      saveAs(
+        new Blob([meshsBuffer], { type: STLExporter.mimeType }),
+        `3D-print-${content.trim()}-qrcode-plan.stl`
+      );
+    }
   }
 
   return {
-    exportGeometry,
-    exportPlan,
+    exportGeometries,
   };
 }

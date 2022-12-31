@@ -7,4 +7,6 @@ export const appParams = {
   planHeight: 1,
   color: 0x000000,
   planColor: 0xffffff,
+  meshArray: 9,
+  isArray: false,
 };

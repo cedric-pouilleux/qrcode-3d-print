@@ -31,7 +31,7 @@ interface IUseGeometry {
 
 export function useGeometryBuilder(): IUseGeometry {
   function gridHelper(size: number): THREE.GridHelper {
-    const gridHelper = new THREE.GridHelper(size + 5, size + 5, '#ccc', '#333');
+    const gridHelper = new THREE.GridHelper(130, 50, '#ccc', '#333');
     gridHelper.rotation.x = 1.5708; //90deg
     gridHelper.position.z = -2;
     return gridHelper;
@@ -64,8 +64,7 @@ export function useGeometryBuilder(): IUseGeometry {
         color: payload.color,
       })
     );
-    const positions = Math.round(-payload.size / 2);
-    mesh.position.set(positions, positions, 0);
+    mesh.position.set(0, 0, 0);
     mesh.name = 'qrcode';
     return mesh;
   }
@@ -78,12 +77,12 @@ export function useGeometryBuilder(): IUseGeometry {
 
   function generateCamera(startPosition: number): THREE.PerspectiveCamera {
     const camera = new THREE.PerspectiveCamera(
-      50,
+      10,
       window.innerWidth / window.innerHeight,
       0.1,
-      1000
+      5000
     );
-    camera.position.z = startPosition;
+    camera.position.z = 1000;
     return camera;
   }
 
