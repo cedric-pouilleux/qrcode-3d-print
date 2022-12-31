@@ -41,47 +41,21 @@ const emits = defineEmits<{
 const canvas = ref(null);
 
 const scene = new THREE.Scene();
-
-defineExpose({
-  scene,
-});
-
 const renderer = new THREE.WebGLRenderer();
 const camera = generateCamera(50);
 const controls = new OrbitControls(camera, renderer.domElement);
 const light = new THREE.AmbientLight(0xcccccc); // soft white light
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
-
-const labelRenderer = new CSS2DRenderer();
-labelRenderer.setSize(window.innerWidth, window.innerHeight);
-labelRenderer.domElement.style.position = 'absolute';
-labelRenderer.domElement.style.top = '0px';
-labelRenderer.domElement.style.pointerEvents = 'none';
-document.body.appendChild(labelRenderer.domElement);
-
-const labelDiv = document.createElement('div');
-labelDiv.className = 'label';
-labelDiv.style.marginTop = '-1em';
-const label = new CSS2DObject(labelDiv);
-labelRenderer.render(scene, camera);
 
 const pointLight = generateLight();
 
 renderer.setSize(window.innerWidth, window.innerHeight);
 scene.add(camera);
-scene.add(label);
 
 onMounted(() => {
   canvas.value.appendChild(renderer.domElement);
   animate();
   refresh();
-  scene.add(grid.value);
   window.addEventListener('resize', () => resize());
-  window.addEventListener('mousemove', ({ clientX, clientY }) => {
-    mouse.x = (clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(clientY / window.innerHeight) * 2 + 1;
-  });
 });
 
 onBeforeUnmount(() => {
@@ -249,25 +223,6 @@ function generateScene() {
 function animate(): void {
   requestAnimationFrame(animate);
   controls.update();
-  raycaster.setFromCamera(mouse, camera);
-  const [hovered] = raycaster.intersectObjects(scene.children);
-  if (hovered) {
-    renderer.domElement.className = 'hovered';
-    label.visible = true;
-    labelDiv.textContent = hovered.object.id;
-    const offset = new THREE.Vector3();
-    new THREE.Box3().setFromObject(hovered.object).getSize(offset);
-    label.position.set(
-      hovered.object.position.x,
-      offset.y / 2,
-      hovered.object.position.x
-    );
-  } else {
-    renderer.domElement.className = '';
-    label.visible = false;
-    labelDiv.textContent = '';
-  }
-
   renderer.render(scene, camera);
 }
 
@@ -278,4 +233,8 @@ function resize(): void {
 }
 
 watch(() => props, refresh, { deep: true });
+
+defineExpose({
+  scene,
+});
 </script>
