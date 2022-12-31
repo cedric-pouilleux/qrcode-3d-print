@@ -4,7 +4,7 @@ import { saveAs } from 'file-saver';
 import { STLExporter } from 'three/addons/exporters/STLExporter.js';
 
 interface IUseExports {
-  exportGeometries(scene: THREE.Scene, merge: BooleanConstructor): void;
+  exportGeometries(scene: THREE.Scene, merge: Boolean): void;
 }
 
 export function useExports(content: string): IUseExports {
