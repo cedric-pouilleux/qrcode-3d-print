@@ -107,7 +107,7 @@ const duplicateQrcodes = computed(() =>
   new Array(props.meshArray).fill(undefined).map((_) => props.qrcodes[0])
 );
 
-function generateQrcodes() {
+const generateQrcodes = computed(() => {
   const group = prepareQrcodeGroup(
     props.isArray ? duplicateQrcodes.value : props.qrcodes,
     props.qrcodeSize
@@ -115,12 +115,12 @@ function generateQrcodes() {
   const boundingBox = new THREE.Box3().setFromObject(group);
   group.position.sub(boundingBox.getCenter(new THREE.Vector3()));
   return group;
-}
+});
 
 function refresh(params: RefreshPayload): void {
   clearSceneMeshs();
   generateScene();
-  scene.add(generateQrcodes());
+  scene.add(generateQrcodes.value);
 }
 
 function generateScene() {
