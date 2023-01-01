@@ -24,9 +24,6 @@ interface IUseGeometry {
   generateQrcode(payload: GenerateMeshQrcodePayload): THREE.Mesh;
   generateCamera(startPosition: number): THREE.PerspectiveCamera;
   generateLight(): THREE.PointLight;
-  generateBufferGeometry(
-    payload: GenerateBufferGeometryPayload
-  ): Array<THREE.BufferGeometry>;
 }
 
 export function useGeometryBuilder(): IUseGeometry {
@@ -116,6 +113,5 @@ export function useGeometryBuilder(): IUseGeometry {
     generateQrcode,
     generateCamera,
     generateLight,
-    generateBufferGeometry,
   };
 }

@@ -1,19 +1,21 @@
 <template>
   <div class="app">
     <custom-params v-model="params" @stl-export="handleExport" />
-    <qrcodes-options v-model="codes" />
-    <view-scene
-      ref="viewScene"
-      :qrcode="generatedQrcode.data"
-      :qrcodes="parsedCodes"
-      :qrcode-size="generatedQrcode.size"
-      :plan-color="params.planColor"
-      :mesh-color="params.color"
-      :meshs-merge="params.mergeGeometry"
-      :mesh-array="params.meshArray"
-      :is-array="params.isArray"
-      @edit-printable="printableObjects = $event"
-    />
+    <div class="flex">
+      <qrcodes-options class="a" v-model="params" />
+      <view-scene
+        ref="viewScene"
+        :qrcode="generatedQrcode.data"
+        :qrcodes="parsedCodes"
+        :qrcode-size="generatedQrcode.size"
+        :plan-color="params.planColor"
+        :mesh-color="params.color"
+        :meshs-merge="params.mergeGeometry"
+        :mesh-array="params.meshArray"
+        :is-array="params.isArray"
+        @edit-printable="printableObjects = $event"
+      />
+    </div>
   </div>
 </template>
 
@@ -27,8 +29,6 @@ import CustomParams from './components/CustomParams.vue';
 import QrcodesOptions from './components/QrcodesOptions.vue';
 import ViewScene from './components/ViewScene.vue';
 import { Qrcodes } from './types';
-
-import * as exportSTL from 'threejs-export-stl';
 
 const params = reactive(appParams);
 
@@ -61,27 +61,29 @@ const generatedQrcode = computed(
     }).modules
 );
 
-const { exportGeometries } = useExports(params.content);
-
 function handleExport() {
+  const { exportGeometries } = useExports(params.content);
   exportGeometries(viewScene.value.scene, params.merge);
-
-  /**
-
-  const qrcodeMesh = printableObjects.value[0];
-  exportGeometry(qrcodeMesh);
-  if (!params.mergeGeometry) {
-    const planMesh = printableObjects.value[1];
-    exportPlan(planMesh);
-  }**/
 }
 </script>
 
 <style scoped>
 .tweakpane {
-  width: 300px;
+  width: 250px;
   position: absolute;
   top: 10px;
   right: 10px;
+}
+
+.a {
+  max-width: 290px;
+  min-width: 290px;
+  display: block;
+}
+.flex {
+  display: flex;
+}
+.flex * {
+  width: 100%;
 }
 </style>

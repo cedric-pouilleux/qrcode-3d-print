@@ -4,11 +4,5 @@ body {
   padding: 0;
   overflow: hidden;
   background-color: #000;
-}
-
-.label {
-  color: #fff;
-  font-family: sans-serif;
-  padding: 2px;
-  background: rgba(0, 0, 0, 0.6);
+  font-family: Arial;
 }

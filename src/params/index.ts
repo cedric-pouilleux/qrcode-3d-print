@@ -1,7 +1,7 @@
 export const appParams = {
   content: 'Start writing',
   errorCorrectionLevel: 'M',
-  maskPattern: 0,
+  maskPattern: 4,
   mergeGeometry: false,
   height: 5,
   planHeight: 1,

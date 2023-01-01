@@ -16,7 +16,6 @@ const {
   generateQrcode,
   generateCamera,
   generateLight,
-  generateBufferGeometry,
 } = useGeometryBuilder();
 
 const props = defineProps({
@@ -42,13 +41,13 @@ const camera = generateCamera();
 const controls = new OrbitControls(camera, renderer.domElement);
 const light = new THREE.AmbientLight(0xcccccc);
 const pointLight = generateLight();
-renderer.setSize(window.innerWidth, window.innerHeight);
 scene.add(camera);
 
 onMounted(() => {
   canvas.value.appendChild(renderer.domElement);
   animate();
   refresh();
+  resize();
   window.addEventListener('resize', () => resize());
 });
 
@@ -107,7 +106,7 @@ const duplicateQrcodes = computed(() =>
   new Array(props.meshArray).fill(undefined).map((_) => props.qrcodes[0])
 );
 
-const generateQrcodes = computed(() => {
+const generateQrcodes = computed((): THREE.Group => {
   const group = prepareQrcodeGroup(
     props.isArray ? duplicateQrcodes.value : props.qrcodes,
     props.qrcodeSize
@@ -123,7 +122,7 @@ function refresh(params: RefreshPayload): void {
   scene.add(generateQrcodes.value);
 }
 
-function generateScene() {
+function generateScene(): void {
   scene.add(light);
   scene.add(grid.value);
   scene.add(pointLight);
@@ -136,9 +135,10 @@ function animate(): void {
 }
 
 function resize(): void {
-  camera.aspect = window.innerWidth / window.innerHeight;
+  console.log(canvas.value.clientHeight, canvas.value.clientWidth);
+  camera.aspect = canvas.value.clientWidth / canvas.value.clientHeight;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(canvas.value.clientWidth, canvas.value.clientHeight);
 }
 
 watch(() => props, refresh, { deep: true });
