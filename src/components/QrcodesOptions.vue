@@ -13,7 +13,7 @@
     </div>
 
     <div class="separator"></div>
-    <p class="infos">Make random qrcodes based on UUID</p>
+
     <div class="randomise" v-if="isRandomise">
       <div class="label-sized">Qrcode count</div>
       <input
