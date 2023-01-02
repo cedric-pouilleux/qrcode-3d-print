@@ -2,6 +2,11 @@
 
 Generate autosized 3D qrcode printable file.
 
+# Fonctionality
+
+- Duplication
+- Randomisation with UUID
+
 # Export
 
 - STL Exportable with seperates files per geometry for bicolor 3D printing
