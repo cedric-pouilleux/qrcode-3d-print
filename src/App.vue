@@ -14,6 +14,7 @@
       <qrcodes-options
         class="a"
         v-model="params"
+        v-model:codes="codes"
         v-model:display="display"
         @stl-export="handleExport"
       />
@@ -72,6 +73,24 @@ const duplicate = computed((): Array<Qrcodes> => {
   }));
 });
 
+const manual = computed((): Array<Qrcodes> => {
+  const { modules } = create(params.content, {
+    errorCorrectionLevel: params.errorCorrectionLevel,
+    maskPattern: params.maskPattern,
+  });
+  return codes.value.map((item) => {
+    const { modules } = create(item, {
+      errorCorrectionLevel: params.errorCorrectionLevel,
+      maskPattern: params.maskPattern,
+    });
+    return {
+      content: item,
+      data: modules.data,
+      size: modules.size,
+    };
+  });
+});
+
 const parsedCodes = computed((): Qrcodes => {
   switch (display.value) {
     case 'randomise':
@@ -82,6 +101,7 @@ const parsedCodes = computed((): Qrcodes => {
       }
       return duplicate.value;
     case 'manual':
+      return manual.value;
   }
 });
 

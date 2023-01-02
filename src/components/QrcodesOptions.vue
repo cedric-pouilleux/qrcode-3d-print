@@ -16,7 +16,7 @@
     <div class="randomise" v-if="isRandomise">
       <div class="label">Qrcode count</div>
       <input
-        type="text"
+        type="number"
         class="count"
         placeholder="Number"
         :min="0"
@@ -41,19 +41,33 @@
       />
     </div>
 
-    <div class="randomise" v-if="isManual">
-      <div class="label">#1</div>
-      <input type="text" placeholder="Enter your qrcode" />
-      <div class="icon">
-        <button>x</button>
+    <div class="inner" v-if="isManual">
+      <div v-for="(code, index) in codes" class="randomise">
+        <input
+          type="text"
+          placeholder="Enter your qrcode"
+          v-model="codes[index]"
+        />
+        <div class="icon">
+          <button @click="handleRemoveQrcode(index)">
+            <CloseThick style="font-size: 1.6em" />
+          </button>
+        </div>
       </div>
+      <button class="add-qrcode" @click="handleAddQrcode">
+        <PlusThick /> Add Qrcode
+      </button>
     </div>
 
     <div class="separator"></div>
 
     <section class="options-section">
       <h3 @click="qrcodesOpen = !qrcodesOpen">
-        Qrcodes options <ChevronUp v-if="qrcodesOpen" /><ChevronDown v-else />
+        Qrcodes options
+        <ChevronUp style="font-size: 1.8em" v-if="qrcodesOpen" /><ChevronDown
+          style="font-size: 1.8em"
+          v-else
+        />
       </h3>
       <div class="inner" v-if="qrcodesOpen">
         <div class="randomise">
@@ -84,7 +98,11 @@
     <div class="separator"></div>
     <section class="options-section">
       <h3 @click="exportOpen = !exportOpen">
-        Export options <ChevronUp v-if="exportOpen" /><ChevronDown v-else />
+        Export options
+        <ChevronUp style="font-size: 1.6em" v-if="exportOpen" /><ChevronDown
+          style="font-size: 1.6em"
+          v-else
+        />
       </h3>
       <div class="randomise" v-if="exportOpen">
         <div class="label-sized">Export separate geometry</div>
@@ -110,7 +128,7 @@
 <script setup lang="ts">
 import { computed, watch, ref } from 'vue';
 import { VTweakpane } from 'v-tweakpane';
-import { object, string } from 'vue-types';
+import { object, string, array } from 'vue-types';
 import slider from 'vue3-slider';
 import Toggle from '@vueform/toggle';
 import mdiContentCopy from '~icons/mdi/content-copy';
@@ -118,16 +136,20 @@ import ShuffleVariant from '~icons/mdi/shuffle-variant';
 import FileDownload from '~icons/mdi/file-download';
 import ChevronUp from '~icons/mdi/chevron-up';
 import ChevronDown from '~icons/mdi/chevron-down';
+import CloseThick from '~icons/mdi/close-thick';
+import PlusThick from '~icons/mdi/plus-thick';
 
 type Tab = 'randomise' | 'manual' | 'duplicate';
 
 const props = defineProps({
   modelValue: object<any>().isRequired,
+  codes: array<string>(),
   display: string<Tab>().def('randomise'),
 });
 
 const emits = defineEmits<{
   (e: 'update:display', value): void;
+  (e: 'update:codes', value): void;
 }>();
 
 const isRandomise = computed(() => props.display === 'randomise');
@@ -144,6 +166,14 @@ const tab = computed({
     return props.display;
   },
 });
+
+function handleAddQrcode() {
+  props.codes.push('testeur');
+}
+
+function handleRemoveQrcode(index) {
+  props.codes.slice(index, 1);
+}
 </script>
 
 <style src="@vueform/toggle/themes/default.css"></style>
@@ -183,6 +213,20 @@ h3:hover {
 
 .actions {
   display: flex;
+}
+
+button.add-qrcode {
+  background-color: #000;
+  display: flex;
+  cursor: pointer;
+  column-gap: 6px;
+  color: #ccc;
+  text-decoration: underline;
+  align-items: center;
+}
+
+button.add-qrcode:hover {
+  color: orange;
 }
 
 .actions button {
@@ -267,7 +311,7 @@ input {
 }
 
 .randomise button {
-  background-color: #444;
+  background-color: #000;
   border-radius: 4px;
   font-size: 0.7em;
   color: #fff;
