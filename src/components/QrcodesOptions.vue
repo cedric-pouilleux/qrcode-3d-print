@@ -13,6 +13,7 @@
     </div>
 
     <div class="separator"></div>
+    <p class="infos">Make random qrcodes based on UUID</p>
     <div class="randomise" v-if="isRandomise">
       <div class="label-sized">Qrcode count</div>
       <input
@@ -120,7 +121,9 @@
     <div class="separator"></div>
 
     <div class="actions">
-      <button><FileDownload style="font-size: 1.2em" />Export STL file</button>
+      <button @click="emits('export')">
+        <FileDownload style="font-size: 1.2em" />Export STL file
+      </button>
     </div>
   </div>
 </template>
@@ -151,6 +154,7 @@ const emits = defineEmits<{
   (e: 'update:display', value): void;
   (e: 'remove', id: number): void;
   (e: 'add', id: string): void;
+  (e: 'export', id: string): void;
 }>();
 
 const isRandomise = computed(() => props.display === 'randomise');
@@ -172,6 +176,10 @@ const tab = computed({
 <style src="@vueform/toggle/themes/default.css"></style>
 
 <style scoped lang="scss">
+.infos {
+  font-size: 0.8em;
+}
+
 .options-section h3 {
   display: flex;
   font-size: 0.8em;

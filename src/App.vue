@@ -5,12 +5,7 @@
     </div>
 
     <div class="flex">
-      <view-scene
-        ref="viewScene"
-        :params="params"
-        :qrcodes="parsedCodes"
-        @edit-printable="printableObjects = $event"
-      />
+      <view-scene ref="viewScene" :params="params" :qrcodes="parsedCodes" />
       <qrcodes-options
         class="a"
         v-model="params"
@@ -19,6 +14,7 @@
         @stl-export="handleExport"
         @remove="handleRemoveManual"
         @add="handleAddManual"
+        @export="handleExport"
       />
     </div>
 
