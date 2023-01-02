@@ -20,16 +20,8 @@ const {
 
 const props = defineProps({
   qrcodes: object<Qrcodes>(),
-  meshsMerge: bool().def(true),
-  planColor: number(),
-  meshColor: number(),
-  meshArray: number().def(1),
-  isArray: bool().def(false),
+  params: object<any>(),
 });
-
-const emits = defineEmits<{
-  (e: 'edit-printable', value: Array<any>): void;
-}>();
 
 const canvas = ref(null);
 
@@ -81,7 +73,7 @@ function prepareQrcodeGroup(qrcodes) {
       generateQrcode({
         qrcode: qrcodes[index].data,
         size: qrcodes[index].size,
-        color: props.meshColor,
+        color: props.params.color,
       })
     );
     innerGroup.add(

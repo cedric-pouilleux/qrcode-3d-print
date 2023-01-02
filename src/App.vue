@@ -3,15 +3,17 @@
     <div class="flex">
       <view-scene
         ref="viewScene"
+        :params="params"
         :qrcodes="parsedCodes"
-        :plan-color="params.planColor"
-        :mesh-color="params.color"
-        :meshs-merge="params.mergeGeometry"
-        :mesh-array="params.meshArray"
-        :is-array="params.isArray"
+        :mesh-array="params.qrcodeDisplay"
         @edit-printable="printableObjects = $event"
       />
-      <qrcodes-options class="a" v-model="params" @stl-export="handleExport" />
+      <qrcodes-options
+        class="a"
+        v-model="params"
+        v-model:display="display"
+        @stl-export="handleExport"
+      />
     </div>
   </div>
 </template>
@@ -25,23 +27,42 @@ import { create, BitMatrix } from 'qrcode';
 import QrcodesOptions from './components/QrcodesOptions.vue';
 import ViewScene from './components/ViewScene.vue';
 import { Qrcodes } from './types';
+import { v4 as uuidv4 } from 'uuid';
 
 const params = reactive(appParams);
 
 //@TODO
 const codes = ref(['printable']);
+const display = ref('randomise');
 
 const printableObjects = ref<Array<Mesh>>([]);
 
 const viewScene = ref(null);
 
 const parsedCodes = computed((): Qrcodes => {
-  if (params.content && params.meshArray > 0) {
+  console.log();
+  if (display.value === 'randomise') {
+    const id = uuidv4();
+    return new Array(params.qrcodeDisplay).fill(undefined).map((_) => {
+      const id = uuidv4();
+      const { modules } = create(id, {
+        errorCorrectionLevel: params.errorCorrectionLevel,
+        maskPattern: params.maskPattern,
+      });
+      return {
+        content: uuidv4(),
+        data: modules.data,
+        size: modules.size,
+      };
+    });
+  }
+
+  if (display.value === 'duplicate') {
     const { modules } = create(params.content, {
       errorCorrectionLevel: params.errorCorrectionLevel,
       maskPattern: params.maskPattern,
     });
-    const a = new Array(params.meshArray).fill(undefined).map((_) => ({
+    const a = new Array(params.qrcodeDisplay).fill(undefined).map((_) => ({
       content: params.content,
       data: modules.data,
       size: modules.size,

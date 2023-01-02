@@ -2,30 +2,21 @@
   <div class="qrcode-panel">
     <h2>3D Print QR Code</h2>
     <div class="menu">
-      <button
-        :class="{ active: currentTab === 'randomise' }"
-        @click="currentTab = 'randomise'"
-      >
+      <button :class="{ active: isRandomise }" @click="tab = 'randomise'">
         Randomise
       </button>
-      <button
-        :class="{ active: currentTab === 'duplicate' }"
-        @click="currentTab = 'duplicate'"
-      >
+      <button :class="{ active: isDuplicate }" @click="tab = 'duplicate'">
         Duplicate
       </button>
-      <button
-        :class="{ active: currentTab === 'manual' }"
-        @click="currentTab = 'manual'"
-      >
+      <button :class="{ active: isManual }" @click="tab = 'manual'">
         Manual
       </button>
     </div>
-    <div class="randomise" v-if="currentTab === 'randomise'">
+    <div class="randomise" v-if="isRandomise">
       <div class="label">Qrcode count</div>
       <input type="text" class="count" placeholder="1" value="1" />
     </div>
-    <div class="randomise" v-if="currentTab === 'duplicate'">
+    <div class="randomise" v-if="isDuplicate">
       <input
         type="text"
         placeholder="Enter your qrcode"
@@ -38,7 +29,7 @@
         v-model.number="state.meshArray"
       />
     </div>
-    <div class="randomise" v-if="currentTab === 'manual'">
+    <div class="randomise" v-if="isManual">
       <div class="label">#1</div>
       <input type="text" placeholder="Enter your qrcode" />
       <div class="icon">
@@ -100,19 +91,34 @@
 <script setup lang="ts">
 import { computed, watch, ref } from 'vue';
 import { VTweakpane } from 'v-tweakpane';
-import { object } from 'vue-types';
+import { object, string } from 'vue-types';
 import slider from 'vue3-slider';
 import Toggle from '@vueform/toggle';
 
+type Tab = 'randomise' | 'manual' | 'duplicate';
+
 const props = defineProps({
   modelValue: object<any>().isRequired,
+  display: string<Tab>().def('randomise'),
 });
-
-const currentTab = ref('randomise');
 
 const emits = defineEmits<{
   (e: 'update:modelValue', value: array<any>): void;
+  (e: 'update:display', value): void;
 }>();
+
+const isRandomise = computed(() => props.display === 'randomise');
+const isManual = computed(() => props.display === 'manual');
+const isDuplicate = computed(() => props.display === 'duplicate');
+
+const tab = computed({
+  set(value) {
+    emits('update:display', value);
+  },
+  get() {
+    return props.modelValue;
+  },
+});
 
 const state = computed({
   set(value) {
