@@ -1,5 +1,5 @@
 export const appParams = {
-  content: 'Start writing',
+  content: undefined,
   errorCorrectionLevel: 'M',
   maskPattern: 4,
   mergeGeometry: false,

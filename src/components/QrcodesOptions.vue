@@ -1,6 +1,6 @@
 <template>
   <div class="qrcode-panel">
-    <h2>QRcodes</h2>
+    <h2>3D Print QR Code</h2>
     <div class="menu">
       <button
         :class="{ active: currentTab === 'randomise' }"
@@ -26,8 +26,17 @@
       <input type="text" class="count" placeholder="1" value="1" />
     </div>
     <div class="randomise" v-if="currentTab === 'duplicate'">
-      <input type="text" placeholder="Enter your qrcode" />
-      <input type="text" class="count" placeholder="1" value="1" />
+      <input
+        type="text"
+        placeholder="Enter your qrcode"
+        v-model="state.content"
+      />
+      <input
+        type="text"
+        class="count"
+        placeholder="1"
+        v-model.number="state.meshArray"
+      />
     </div>
     <div class="randomise" v-if="currentTab === 'manual'">
       <div class="label">#1</div>
@@ -38,36 +47,49 @@
     </div>
 
     <div class="separator"></div>
-    <div class="randomise">
-      <div class="label-sized">Mask pattern</div>
-      <slider
-        v-model="state.maskPattern"
-        color="#000"
-        width="100%"
-        :max="9"
-        :min="0"
-        alwaysShowHandle
-        track-color="#222"
-        :tooltip="true"
-      />
-    </div>
-    <div class="randomise">
-      <div class="label-sized">Correction</div>
-      <select v-model="state.errorCorrectionLevel">
-        <option value="L">Low</option>
-        <option value="M">Medium</option>
-        <option value="Q">Quartile</option>
-        <option value="H">High</option>
-      </select>
-    </div>
+
+    <section class="options-section">
+      <h3>Qrcodes options</h3>
+      <div class="randomise">
+        <div class="label-sized">Mask pattern</div>
+        <slider
+          v-model="state.maskPattern"
+          color="#000"
+          width="100%"
+          :max="9"
+          :min="0"
+          alwaysShowHandle
+          track-color="#222"
+          :tooltip="true"
+        />
+      </div>
+      <div class="randomise">
+        <div class="label-sized">Correction</div>
+        <select v-model="state.errorCorrectionLevel">
+          <option value="L">Low</option>
+          <option value="M">Medium</option>
+          <option value="Q">Quartile</option>
+          <option value="H">High</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="options-section">
+      <h3>Export options</h3>
+      <div class="randomise">
+        <div class="label-sized">Export separate geometry</div>
+        <div>
+          <Toggle
+            v-model="state.mergeGeometry"
+            on-label="Yes"
+            off-label="No"
+            class="toggle-grey"
+          />
+        </div>
+      </div>
+    </section>
 
     <div class="separator"></div>
-    <div class="randomise">
-      <div class="label-sized">Export for bicolors</div>
-      <div>
-        <Toggle v-model="state.mergeGeometry" on-label="Yes" off-label="No" />
-      </div>
-    </div>
 
     <div class="actions">
       <button>Export STL file</button>
@@ -78,12 +100,12 @@
 <script setup lang="ts">
 import { computed, watch, ref } from 'vue';
 import { VTweakpane } from 'v-tweakpane';
-import { array } from 'vue-types';
+import { object } from 'vue-types';
 import slider from 'vue3-slider';
 import Toggle from '@vueform/toggle';
 
 const props = defineProps({
-  modelValue: array<any>().isRequired,
+  modelValue: object<any>().isRequired,
 });
 
 const currentTab = ref('randomise');
@@ -112,6 +134,17 @@ select {
   border-radius: 4px;
   border: 0;
   width: 100%;
+}
+
+.toggle-grey {
+  --toggle-bg-on: #666;
+  --toggle-border-on: #777;
+}
+
+h3 {
+  font-size: 0.7em;
+  color: #777;
+  font-weight: 400;
 }
 
 .actions {

@@ -6,7 +6,7 @@
 import { onMounted, watch, ref, onBeforeUnmount, computed } from 'vue';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { integer, number, instanceOf, bool, array } from 'vue-types';
+import { integer, number, instanceOf, bool, object } from 'vue-types';
 import { useGeometryBuilder } from '../composables/useGeometryBuilder';
 import { Qrcodes } from './types';
 
@@ -19,9 +19,7 @@ const {
 } = useGeometryBuilder();
 
 const props = defineProps({
-  qrcode: instanceOf(Uint8Array).isRequired,
-  qrcodes: array<Qrcodes>(),
-  qrcodeSize: number().isRequired,
+  qrcodes: object<Qrcodes>(),
   meshsMerge: bool().def(true),
   planColor: number(),
   meshColor: number(),
@@ -61,18 +59,9 @@ function clearSceneMeshs() {
   }
 }
 
-const grid = computed(() => generateGrid(props.qrcodeSize));
+const grid = computed(() => generateGrid(props.qrcodes[0].size));
 
-function qrcode(qrcode: Qrcodes): THREE.Mesh {
-  const mesh = generateQrcode({
-    qrcode: qrcode.data,
-    size: qrcode.size,
-    color: props.meshColor,
-  });
-  return mesh;
-}
-
-function prepareQrcodeGroup(qrcodes, size) {
+function prepareQrcodeGroup(qrcodes) {
   const group = new THREE.Group();
   let row = 0;
   let col = 0;
@@ -81,36 +70,35 @@ function prepareQrcodeGroup(qrcodes, size) {
   for (let index = 0; index < count; index++) {
     const innerGroup = new THREE.Group();
     if (index) {
-      if (index % Math.sqrt(count) === 0) {
+      if (index % Math.round(Math.sqrt(count)) === 0) {
         col++;
         row = 0;
       } else {
         row++;
       }
     }
-    innerGroup.add(qrcode(qrcodes[index]));
+    innerGroup.add(
+      generateQrcode({
+        qrcode: qrcodes[index].data,
+        size: qrcodes[index].size,
+        color: props.meshColor,
+      })
+    );
     innerGroup.add(
       generatePlan({
-        size,
+        size: qrcodes[index].size,
         color: 0xffffff,
       })
     );
-    innerGroup.position.x = col * (size + margin);
-    innerGroup.position.y = row * (size + margin);
+    innerGroup.position.x = col * (qrcodes[index].size + margin);
+    innerGroup.position.y = row * (qrcodes[index].size + margin);
     group.add(innerGroup);
   }
   return group;
 }
 
-const duplicateQrcodes = computed(() =>
-  new Array(props.meshArray).fill(undefined).map((_) => props.qrcodes[0])
-);
-
 const generateQrcodes = computed((): THREE.Group => {
-  const group = prepareQrcodeGroup(
-    props.isArray ? duplicateQrcodes.value : props.qrcodes,
-    props.qrcodeSize
-  );
+  const group = prepareQrcodeGroup(props.qrcodes);
   const boundingBox = new THREE.Box3().setFromObject(group);
   group.position.sub(boundingBox.getCenter(new THREE.Vector3()));
   return group;
@@ -135,7 +123,6 @@ function animate(): void {
 }
 
 function resize(): void {
-  console.log(canvas.value.clientHeight, canvas.value.clientWidth);
   camera.aspect = canvas.value.clientWidth / canvas.value.clientHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(canvas.value.clientWidth, canvas.value.clientHeight);
