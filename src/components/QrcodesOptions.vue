@@ -1,18 +1,18 @@
 <template>
   <div class="qrcode-panel">
-    <h2>3D Print QR Code</h2>
     <div class="menu">
       <button :class="{ active: isRandomise }" @click="tab = 'randomise'">
-        Randomise
+        <ShuffleVariant /> Randomise
       </button>
       <button :class="{ active: isDuplicate }" @click="tab = 'duplicate'">
-        Duplicate
+        <mdiContentCopy /> Duplicate
       </button>
       <button :class="{ active: isManual }" @click="tab = 'manual'">
         Manual
       </button>
     </div>
 
+    <div class="separator"></div>
     <div class="randomise" v-if="isRandomise">
       <div class="label">Qrcode count</div>
       <input
@@ -52,34 +52,41 @@
     <div class="separator"></div>
 
     <section class="options-section">
-      <h3>Qrcodes options</h3>
-      <div class="randomise">
-        <div class="label-sized">Mask pattern</div>
-        <slider
-          v-model="modelValue.maskPattern"
-          color="#000"
-          width="100%"
-          :max="9"
-          :min="0"
-          alwaysShowHandle
-          track-color="#222"
-          :tooltip="true"
-        />
-      </div>
-      <div class="randomise">
-        <div class="label-sized">Correction</div>
-        <select v-model="modelValue.errorCorrectionLevel">
-          <option value="L">Low</option>
-          <option value="M">Medium</option>
-          <option value="Q">Quartile</option>
-          <option value="H">High</option>
-        </select>
+      <h3 @click="qrcodesOpen = !qrcodesOpen">
+        Qrcodes options <ChevronUp v-if="qrcodesOpen" /><ChevronDown v-else />
+      </h3>
+      <div class="inner" v-if="qrcodesOpen">
+        <div class="randomise">
+          <div class="label-sized">Mask pattern</div>
+          <slider
+            v-model="modelValue.maskPattern"
+            color="#555"
+            width="100%"
+            :max="9"
+            :min="0"
+            alwaysShowHandle
+            track-color="#222"
+            :tooltip="true"
+          />
+        </div>
+        <div class="randomise">
+          <div class="label-sized">Correction</div>
+          <select v-model="modelValue.errorCorrectionLevel">
+            <option value="L">Low</option>
+            <option value="M">Medium</option>
+            <option value="Q">Quartile</option>
+            <option value="H">High</option>
+          </select>
+        </div>
       </div>
     </section>
 
+    <div class="separator"></div>
     <section class="options-section">
-      <h3>Export options</h3>
-      <div class="randomise">
+      <h3 @click="exportOpen = !exportOpen">
+        Export options <ChevronUp v-if="exportOpen" /><ChevronDown v-else />
+      </h3>
+      <div class="randomise" v-if="exportOpen">
         <div class="label-sized">Export separate geometry</div>
         <div>
           <Toggle
@@ -95,7 +102,7 @@
     <div class="separator"></div>
 
     <div class="actions">
-      <button>Export STL file</button>
+      <button><FileDownload style="font-size: 1.2em" />Export STL file</button>
     </div>
   </div>
 </template>
@@ -106,6 +113,11 @@ import { VTweakpane } from 'v-tweakpane';
 import { object, string } from 'vue-types';
 import slider from 'vue3-slider';
 import Toggle from '@vueform/toggle';
+import mdiContentCopy from '~icons/mdi/content-copy';
+import ShuffleVariant from '~icons/mdi/shuffle-variant';
+import FileDownload from '~icons/mdi/file-download';
+import ChevronUp from '~icons/mdi/chevron-up';
+import ChevronDown from '~icons/mdi/chevron-down';
 
 type Tab = 'randomise' | 'manual' | 'duplicate';
 
@@ -121,6 +133,8 @@ const emits = defineEmits<{
 const isRandomise = computed(() => props.display === 'randomise');
 const isManual = computed(() => props.display === 'manual');
 const isDuplicate = computed(() => props.display === 'duplicate');
+const qrcodesOpen = ref(false);
+const exportOpen = ref(false);
 
 const tab = computed({
   set(value) {
@@ -135,12 +149,17 @@ const tab = computed({
 <style src="@vueform/toggle/themes/default.css"></style>
 
 <style scoped>
+.options-section h3 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 select {
   color: #fff;
   background-color: #000;
   padding: 6px;
   border-radius: 4px;
-  border: 0;
+  border: 1px solid #222;
   width: 100%;
 }
 
@@ -150,7 +169,14 @@ select {
 }
 
 h3 {
-  font-size: 0.7em;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+h3:hover {
+  color: #ccc;
+}
+.label-sized {
+  font-size: 0.9em;
   color: #777;
   font-weight: 400;
 }
@@ -161,11 +187,16 @@ h3 {
 
 .actions button {
   width: 100%;
-  background-color: #333;
-  color: #fff;
-  border: 0;
+  background-color: #000;
+  border: 1px solid #222;
+  color: orange;
   font-weight: 700;
-  height: 60px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  column-gap: 10px;
+  align-items: center;
+  border-radius: 25px;
 }
 .flex {
   display: flex;
@@ -177,7 +208,7 @@ h3 {
 
 .separator {
   height: 2px;
-  background-color: #222;
+  background-color: #111;
   margin: 20px 0;
 }
 
@@ -186,7 +217,7 @@ input {
   background-color: #000;
   padding: 6px;
   border-radius: 4px;
-  border: 0;
+  border: 1px solid #222;
 }
 
 button {
@@ -195,18 +226,22 @@ button {
 
 .menu {
   display: flex;
-  border-bottom: 1px solid #555;
-  height: 36px;
-  margin-bottom: 12px;
+  column-gap: 10px;
+  height: 28px;
+  overflow: hidden;
 }
 
 .menu button {
   order: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
   font-size: 0.8em;
-  background-color: #333;
+  background-color: #000;
   color: #fff;
   border: 0;
-  border: 1;
+  column-gap: 5px;
+  justify-content: center;
   flex-grow: 1;
 }
 
@@ -215,14 +250,13 @@ input {
 }
 .menu button:hover,
 .menu button.active {
-  background-color: #555;
+  color: orange;
 }
 
 .randomise {
   display: flex;
   align-items: center;
   font-size: 0.8em;
-  background-color: #333;
   margin: 8px 0;
   column-gap: 10px;
   justify-content: space-between;
@@ -242,12 +276,13 @@ input {
 .randomise input {
   flex-grow: 1;
 }
-
 .qrcode-panel {
   height: 100vh;
-  background-color: #333;
+  position: absolute;
+  right: 0;
+  box-sizing: border-box;
+  padding: 16px;
   width: 300px;
   color: #fff;
-  padding: 10px;
 }
 </style>

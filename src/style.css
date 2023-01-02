@@ -4,5 +4,13 @@ body {
   padding: 0;
   overflow: hidden;
   background-color: #000;
-  font-family: Arial;
+  font-family: Roboto;
+}
+
+input {
+  border: 1px solid #222;
+}
+
+canvas {
+  height: 100vh;
 }

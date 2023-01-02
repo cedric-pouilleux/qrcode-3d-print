@@ -1,5 +1,9 @@
 <template>
   <div class="app">
+    <div class="header">
+      <span class="gold"> 3D Print Qrcode generator </span>
+    </div>
+
     <div class="flex">
       <view-scene
         ref="viewScene"
@@ -13,6 +17,10 @@
         v-model:display="display"
         @stl-export="handleExport"
       />
+    </div>
+
+    <div class="footer">
+      <span> Mnz 2022 </span>
     </div>
   </div>
 </template>
@@ -101,5 +109,23 @@ function handleExport() {
 }
 .flex * {
   width: 100%;
+}
+
+.footer {
+  height: 30px;
+  padding: 6px 18px;
+  font-size: 0.8em;
+  color: #fff;
+  position: absolute;
+  bottom: 0;
+}
+
+.header {
+  padding: 18px;
+  position: absolute;
+}
+
+.gold {
+  color: orange;
 }
 </style>
