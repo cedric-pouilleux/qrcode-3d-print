@@ -21,7 +21,7 @@
     </div>
 
     <div class="footer">
-      <span> Mnz 2022 </span>
+      <span><CopyLeft /> Mnz 2022</span>
     </div>
   </div>
 </template>
@@ -36,6 +36,7 @@ import QrcodesOptions from './components/QrcodesOptions.vue';
 import ViewScene from './components/ViewScene.vue';
 import { Qrcodes } from './types';
 import { v4 as uuidv4 } from 'uuid';
+import CopyLeft from '~icons/mdi/copyleft';
 
 const params = reactive(appParams);
 const codes = ref(['printable']);
