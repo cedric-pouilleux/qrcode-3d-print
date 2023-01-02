@@ -17,11 +17,16 @@
         v-model:codes="codes"
         v-model:display="display"
         @stl-export="handleExport"
+        @remove="handleRemoveManual"
+        @add="handleAddManual"
       />
     </div>
 
     <div class="footer">
-      <span><CopyLeft /> Mnz 2022</span>
+      Mnz 2022 <CopyLeft /><a
+        href="https://github.com/cedric-pouilleux/qrcode-3d-print"
+        ><Github
+      /></a>
     </div>
   </div>
 </template>
@@ -37,6 +42,7 @@ import ViewScene from './components/ViewScene.vue';
 import { Qrcodes } from './types';
 import { v4 as uuidv4 } from 'uuid';
 import CopyLeft from '~icons/mdi/copyleft';
+import Github from '~icons/mdi/github';
 
 const params = reactive(appParams);
 const codes = ref(['printable']);
@@ -106,13 +112,21 @@ const parsedCodes = computed((): Qrcodes => {
   }
 });
 
+function handleRemoveManual(id: number) {
+  codes.value.splice(id, 1);
+}
+
+function handleAddManual(value: string) {
+  codes.value.push(value);
+}
+
 function handleExport() {
   const { exportGeometries } = useExports(params.content);
   exportGeometries(viewScene.value.scene, params.merge);
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .tweakpane {
   width: 250px;
   position: absolute;
@@ -134,11 +148,16 @@ function handleExport() {
 
 .footer {
   height: 30px;
+  display: flex;
   padding: 6px 18px;
   font-size: 0.8em;
+  align-items: center;
   color: #fff;
   position: absolute;
   bottom: 0;
+  a {
+    display: flex;
+  }
 }
 
 .header {

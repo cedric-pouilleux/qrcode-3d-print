@@ -14,7 +14,7 @@
 
     <div class="separator"></div>
     <div class="randomise" v-if="isRandomise">
-      <div class="label">Qrcode count</div>
+      <div class="label-sized">Qrcode count</div>
       <input
         type="number"
         class="count"
@@ -42,19 +42,19 @@
     </div>
 
     <div class="inner" v-if="isManual">
-      <div v-for="(code, index) in codes" class="randomise">
+      <div v-for="(code, index) in props.codes" class="randomise">
         <input
           type="text"
           placeholder="Enter your qrcode"
-          v-model="codes[index]"
+          v-model="props.codes[index]"
         />
         <div class="icon">
-          <button @click="handleRemoveQrcode(index)">
+          <button @click="emits('remove', index)">
             <CloseThick style="font-size: 1.6em" />
           </button>
         </div>
       </div>
-      <button class="add-qrcode" @click="handleAddQrcode">
+      <button class="add-qrcode" @click="emits('add', 'test')">
         <PlusThick /> Add Qrcode
       </button>
     </div>
@@ -149,7 +149,8 @@ const props = defineProps({
 
 const emits = defineEmits<{
   (e: 'update:display', value): void;
-  (e: 'update:codes', value): void;
+  (e: 'remove', id: number): void;
+  (e: 'add', id: string): void;
 }>();
 
 const isRandomise = computed(() => props.display === 'randomise');
@@ -166,23 +167,17 @@ const tab = computed({
     return props.display;
   },
 });
-
-function handleAddQrcode() {
-  props.codes.push('testeur');
-}
-
-function handleRemoveQrcode(index) {
-  props.codes.slice(index, 1);
-}
 </script>
 
 <style src="@vueform/toggle/themes/default.css"></style>
 
-<style scoped>
+<style scoped lang="scss">
 .options-section h3 {
   display: flex;
+  font-size: 0.8em;
   justify-content: space-between;
   align-items: center;
+  margin: 0;
 }
 select {
   color: #fff;
@@ -231,17 +226,20 @@ button.add-qrcode:hover {
 
 .actions button {
   width: 100%;
+  border-left: 1px solid #333;
   background-color: #000;
-  border: 1px solid #222;
   color: orange;
-  font-weight: 700;
-  height: 40px;
+  cursor: pointer;
+  padding: 0 12px;
   display: flex;
-  justify-content: center;
   column-gap: 10px;
   align-items: center;
-  border-radius: 25px;
 }
+
+.actions button:hover {
+  border-left-color: orange;
+}
+
 .flex {
   display: flex;
 }
@@ -251,9 +249,9 @@ button.add-qrcode:hover {
 }
 
 .separator {
-  height: 2px;
+  height: 1px;
   background-color: #111;
-  margin: 20px 0;
+  margin: 14px 0;
 }
 
 input {
@@ -306,6 +304,9 @@ input {
   justify-content: space-between;
 }
 
+.randomise .label {
+}
+
 .randomise .label-sized {
   width: 200px;
 }
@@ -321,6 +322,8 @@ input {
   flex-grow: 1;
 }
 .qrcode-panel {
+  background-color: #000;
+  opacity: 0.9;
   height: 100vh;
   position: absolute;
   right: 0;
