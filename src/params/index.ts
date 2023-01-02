@@ -7,5 +7,5 @@ export const appParams = {
   planHeight: 1,
   color: 0x000000,
   planColor: 0xffffff,
-  qrcodeDisplay: 1,
+  qrcodeDisplay: 9,
 };

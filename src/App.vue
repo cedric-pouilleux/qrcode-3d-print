@@ -5,7 +5,6 @@
         ref="viewScene"
         :params="params"
         :qrcodes="parsedCodes"
-        :mesh-array="params.qrcodeDisplay"
         @edit-printable="printableObjects = $event"
       />
       <qrcodes-options
@@ -30,8 +29,6 @@ import { Qrcodes } from './types';
 import { v4 as uuidv4 } from 'uuid';
 
 const params = reactive(appParams);
-
-//@TODO
 const codes = ref(['printable']);
 const display = ref('randomise');
 
@@ -39,48 +36,45 @@ const printableObjects = ref<Array<Mesh>>([]);
 
 const viewScene = ref(null);
 
-const parsedCodes = computed((): Qrcodes => {
-  console.log();
-  if (display.value === 'randomise') {
+const randomise = computed((): Array<Qrcodes> => {
+  const id = uuidv4();
+  return new Array(params.qrcodeDisplay).fill(undefined).map((_) => {
     const id = uuidv4();
-    return new Array(params.qrcodeDisplay).fill(undefined).map((_) => {
-      const id = uuidv4();
-      const { modules } = create(id, {
-        errorCorrectionLevel: params.errorCorrectionLevel,
-        maskPattern: params.maskPattern,
-      });
-      return {
-        content: uuidv4(),
-        data: modules.data,
-        size: modules.size,
-      };
-    });
-  }
-
-  if (display.value === 'duplicate') {
-    const { modules } = create(params.content, {
-      errorCorrectionLevel: params.errorCorrectionLevel,
-      maskPattern: params.maskPattern,
-    });
-    const a = new Array(params.qrcodeDisplay).fill(undefined).map((_) => ({
-      content: params.content,
-      data: modules.data,
-      size: modules.size,
-    }));
-    return a;
-  }
-
-  return codes.value.map((code: string) => {
-    const { modules } = create(code, {
+    const { modules } = create(id, {
       errorCorrectionLevel: params.errorCorrectionLevel,
       maskPattern: params.maskPattern,
     });
     return {
-      content: code,
+      content: uuidv4(),
       data: modules.data,
       size: modules.size,
     };
   });
+});
+
+const duplicate = computed((): Array<Qrcodes> => {
+  const { modules } = create(params.content, {
+    errorCorrectionLevel: params.errorCorrectionLevel,
+    maskPattern: params.maskPattern,
+  });
+  return new Array(params.qrcodeDisplay).fill(undefined).map((_) => ({
+    content: params.content,
+    data: modules.data,
+    size: modules.size,
+  }));
+});
+
+const parsedCodes = computed((): Qrcodes => {
+  switch (display.value) {
+    case 'randomise':
+      return randomise.value;
+    case 'duplicate':
+      if (!params.content) {
+        return;
+      }
+      return duplicate.value;
+    case 'manual':
+  }
 });
 
 function handleExport() {

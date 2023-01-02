@@ -120,7 +120,11 @@ function resize(): void {
   renderer.setSize(canvas.value.clientWidth, canvas.value.clientHeight);
 }
 
-watch(() => props, refresh, { deep: true });
+watch(
+  () => props,
+  () => !!props.qrcodes?.length && refresh(),
+  { deep: true }
+);
 
 defineExpose({
   scene,

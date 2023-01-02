@@ -12,23 +12,35 @@
         Manual
       </button>
     </div>
+
     <div class="randomise" v-if="isRandomise">
       <div class="label">Qrcode count</div>
-      <input type="text" class="count" placeholder="1" value="1" />
+      <input
+        type="text"
+        class="count"
+        placeholder="Number"
+        :min="0"
+        :max="25"
+        v-model.number="modelValue.qrcodeDisplay"
+      />
     </div>
+
     <div class="randomise" v-if="isDuplicate">
       <input
         type="text"
         placeholder="Enter your qrcode"
-        v-model="state.content"
+        v-model="modelValue.content"
       />
       <input
         type="text"
         class="count"
-        placeholder="1"
-        v-model.number="state.meshArray"
+        placeholder="Number"
+        :min="0"
+        :max="25"
+        v-model.number="modelValue.qrcodeDisplay"
       />
     </div>
+
     <div class="randomise" v-if="isManual">
       <div class="label">#1</div>
       <input type="text" placeholder="Enter your qrcode" />
@@ -44,7 +56,7 @@
       <div class="randomise">
         <div class="label-sized">Mask pattern</div>
         <slider
-          v-model="state.maskPattern"
+          v-model="modelValue.maskPattern"
           color="#000"
           width="100%"
           :max="9"
@@ -56,7 +68,7 @@
       </div>
       <div class="randomise">
         <div class="label-sized">Correction</div>
-        <select v-model="state.errorCorrectionLevel">
+        <select v-model="modelValue.errorCorrectionLevel">
           <option value="L">Low</option>
           <option value="M">Medium</option>
           <option value="Q">Quartile</option>
@@ -71,7 +83,7 @@
         <div class="label-sized">Export separate geometry</div>
         <div>
           <Toggle
-            v-model="state.mergeGeometry"
+            v-model="modelValue.mergeGeometry"
             on-label="Yes"
             off-label="No"
             class="toggle-grey"
@@ -103,7 +115,6 @@ const props = defineProps({
 });
 
 const emits = defineEmits<{
-  (e: 'update:modelValue', value: array<any>): void;
   (e: 'update:display', value): void;
 }>();
 
@@ -116,16 +127,7 @@ const tab = computed({
     emits('update:display', value);
   },
   get() {
-    return props.modelValue;
-  },
-});
-
-const state = computed({
-  set(value) {
-    emits('update:modelValue', value);
-  },
-  get() {
-    return props.modelValue;
+    return props.display;
   },
 });
 </script>
