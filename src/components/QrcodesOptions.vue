@@ -176,6 +176,10 @@ const tab = computed({
 <style src="@vueform/toggle/themes/default.css"></style>
 
 <style scoped lang="scss">
+.qrcode-panel {
+  overflow: auto;
+}
+
 .infos {
   font-size: 0.8em;
 }
